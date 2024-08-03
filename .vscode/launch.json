@@ -1,0 +1,67 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "perl",
+      "request": "launch",
+      "name": "Perl-Debug",
+      "program": "${file}",
+      "cwd": "${pwd}",
+      "stopOnEntry": true,
+      "reloadModules": true
+    },
+    {
+      "type": "cmake",
+      "request": "launch",
+      "name": "CMake: Externally launched",
+      "cmakeDebugType": "external",
+      "pipeName": "<...>"
+    },
+    {
+      "name": "(gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "enter program name, for example ${workspaceFolder}/a.out",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${fileDirname}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set Disassembly Flavor to Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "type": "cmake",
+      "request": "launch",
+      "name": "CMake: Configure project",
+      "cmakeDebugType": "configure",
+      "clean": false,
+      "configureAll": false
+    },
+    {
+      "command": "npm start; exit 0",
+      "name": "Run npm start in debug terminal",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${fileDirname}"
+    },
+    {
+      "name": "Attach to Process (Pick)",
+      "type": "node",
+      "request": "attach",
+      "processId": "${command:PickProcess}",
+      "port": 9229
+    }
+  ]
+}
