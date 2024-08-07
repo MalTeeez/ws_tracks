@@ -1,31 +1,70 @@
 <script lang="ts">
 	import NextStep from '$lib/components/NextStep.svelte';
 	import PlaneContainer from '$lib/components/PlaneContainer.svelte';
-	import { browser } from '$app/environment';
-	import { planes, Plane } from '$lib/stores/trackStore';
+	import Plane from '../../../common/model/Plane.js';
+	import { tracks } from '$lib/stores/trackStore';
 	import { parseTrackString } from '$lib/util/parse_util';
+	import { WebSocket } from 'partysocket';
+	import { browser } from '$app/environment';
 
 	let bool: boolean = false;
+	let ws: WebSocket;
 
 	function change_state() {
 		bool = !bool;
 	}
 
-	if (browser) {
-		const socket = new WebSocket('ws://sxmaa.net:9001/tracks');
-		socket.addEventListener('open', () => {
-			console.log('Opened');
-		});
-		socket.addEventListener('message', (event: MessageEvent) => {
-			//console.log("Got message from websocket: " + event.data);
-			const plane: Plane | undefined = parseTrackString(event.data);
-			if (plane) {
-				planes.update((planes) => planes.set(plane.id, plane));
+	function get_ws_state(): string {
+		//if (!browser) return '<div class="bg-gradient-to-r inline-block text-center from-sky-400 to-red-500">CONNECTING</div>'#
+		console.log('Websocket status changed: ' + ws.readyState);
+		let state_tag = '<div class="bg-gradient-to-r inline-block';
+		if (ws.readyState == ws.CLOSED) {
+			if (ws.retryCount > 0) {
+				state_tag += 'from-purple-400 to-violet-500">RECONNECTING';
 			} else {
-				console.log(
-					"Failed to parse track update with content: '" + event.data + "'",
-				);
+				state_tag += 'from-amber-400 to-orange-500">DISCONNECTED';
 			}
+		} else if (ws.readyState == ws.CONNECTING) {
+			state_tag += 'from-sky-400 to-blue-500">CONNECTING';
+		} else if (ws.readyState == ws.OPEN) {
+			state_tag += 'from-lime-400 to-greeen-500">CONNECTED';
+		} else {
+			state_tag += 'from-rose-400 to-red-600">ERRORED';
+		}
+		return (state_tag += '</div>');
+	}
+
+	if (browser) {
+		ws = new WebSocket('ws://sxmaa.net:9001/tracks');
+		ws.addEventListener('open', () => {
+			console.log('ws opened');
+		});
+
+		ws.addEventListener('close', () => {
+			console.log('WS closed');
+		});
+
+		ws.addEventListener('message', (event: MessageEvent) => {
+			//console.log("Got message from websocket: " + event.data);
+			const track_updates: Plane[] = parseTrackString(event.data);
+
+			tracks.update((tracks) => {
+				for (const track of track_updates) {
+					if (tracks.has(track.id)) {
+						// Plane already exists, so we just have to change its coords
+						let old_plane: Plane | undefined = tracks.get(track.id);
+						if (old_plane) {
+							old_plane.x = track.x;
+							old_plane.y = track.y;
+						}
+					} else {
+						// Plane is new, so we can take the instantiated one
+						tracks.set(track.id, track);
+					}
+				}
+
+				return tracks;
+			});
 		});
 	}
 </script>
@@ -38,21 +77,20 @@
 		<NextStep title="Websocket Connection">
 			{#if bool}
 				<p
-					class="font-sans font-semibold underline decoration-2 decoration-sky-500/[.33]"
+					class="font-sans font-semibold underline decoration-2 decoration-sky-500/[.33] text-center"
 				>
 					True!
 				</p>
 			{:else}
 				<p
-					class="font-sans font-semibold underline decoration-2 decoration-fuchsia-500/[.33]"
+					class="font-sans font-semibold underline decoration-2 decoration-fuchsia-500/[.33] text-center"
 				>
 					False?
 				</p>
 			{/if}
-			<p>
-				Edit <code class="text-lime-300">src/routes/+page.svelte</code> to see your
-				changes live.
-			</p>
+			{#if ws}
+				{@html ws.readyState}
+			{/if}
 			<p>
 				The source for these cards is in <code class="text-lime-300"
 					>src/lib/components/NextStep.svelte</code
@@ -64,10 +102,15 @@
 				>.
 			</p>
 			<br />
-			<button class="clicks" on:click={change_state}> Hi! </button>
+			<button
+				class="clicks ring-2 ring-sky-500 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900"
+				on:click={change_state}
+			>
+				Hi!
+			</button>
 		</NextStep>
 
-		<PlaneContainer {planes}></PlaneContainer>
+		<PlaneContainer planes={tracks}></PlaneContainer>
 	</div>
 </main>
 
@@ -79,8 +122,5 @@
 
 	.clicks {
 		border-radius: 0.7rem;
-		border-color: skyblue;
-		border-style: dashed;
-		border-width: 2px;
 	}
 </style>

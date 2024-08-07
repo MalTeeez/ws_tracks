@@ -1,8 +1,8 @@
 {
-  "name": "wstrack-backend",
+  "name": "wstrack-common",
   "version": "1.0.0",
   "description": "",
-  "main": "src/ws_track.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
