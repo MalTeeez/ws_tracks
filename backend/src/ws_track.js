@@ -1,5 +1,6 @@
+// @ts-check
 import uws from '../dist/uws.js';
-import Plane from '../../common/model/Plane.js';
+import Plane from '../../common/model/Plane.js'
 
 const PORT = 9001;
 
@@ -61,7 +62,7 @@ const app = uws.App().ws('/*', {
 
 async function main() {
     while (true) {
-        await new Promise((resolve) => {
+        await /** @type {Promise<void>} */(new Promise((resolve) => {
             let subs = app.numSubscribers('tracks');
             if ( subs > 0 ) {
                 //steps = steps >= 1000 ? 0 : steps + 1;
@@ -93,15 +94,18 @@ async function main() {
                 }
 
             }
+            // @ts-ignore
             process.stdout.clearLine(0);
+            // @ts-ignore
             process.stdout.cursorTo(0);
+            // @ts-ignore
             process.stdout.write(
                 "subs: " + subs
             );
             setTimeout(() => {
                 resolve()
             }, 500);
-        });
+        }));
     }
 }
 
@@ -114,6 +118,10 @@ function generateInitial() {
     console.log("a")
 }
 
+/**
+ * @param {number} min
+ * @param {number} max
+ */
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }

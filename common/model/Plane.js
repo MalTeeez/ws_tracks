@@ -1,3 +1,4 @@
+// @ts-check
 export default class Plane {
   id;
   x;
