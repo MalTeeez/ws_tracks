@@ -4,20 +4,30 @@ import Plane from '../../../../common/model/Plane';
 import { parseTrackString } from './parse_util';
 
 let ws: WebSocket;
-let base_url: string;
+let base_url: string = "sxmaa.net:9001/tracks";
+
+export function closeWS() {
+	if (ws) ws.close();
+}
 
 export function changeChannel(channel: string) {
-    ws.close(0, "CHANGE:channel");
-    initWS(base_url, channel);
+	console.log("Switching channel to " + channel)
+	if (ws) {
+		ws.close();
+	}
+	initWS(base_url, channel);
+	if (ws) {
+		ws.reconnect();
+	}
 }
 
-export function initWS(base: string, channel: string) {
+function initWS(base: string, channel: string) {
     base_url = base;
-	ws = new WebSocket("ws://" + base_url + "/" + channel);
-    add_listeners();
+	ws = new WebSocket("ws://" + base_url + "/" + channel, [], {startClosed: true});
+    add_listeners(ws);
 }
 
-function add_listeners() {
+function add_listeners(ws: WebSocket) {
     ws.addEventListener('open', () => {
 		console.log('WS opened');
 	});
@@ -51,7 +61,7 @@ function handle_track_update(event: MessageEvent) {
 	});
 }
 
-export function get_ws_state(): string {
+export function get_ws_state(ws: WebSocket): string {
     //if (!browser) return '<div class="bg-gradient-to-r inline-block text-center from-sky-400 to-red-500">CONNECTING</div>'#
     console.log('Websocket status changed: ' + ws.readyState);
     let state_tag = '<div class="bg-gradient-to-r inline-block';

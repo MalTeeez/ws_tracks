@@ -1,69 +1,134 @@
 <script lang="ts">
 	import { getInterval, Interval, msToString } from '$lib/util/time_util';
+	import { closeWS } from '$lib/util/ws_util';
 	import { fade } from 'svelte/transition';
 
 	let expanded: boolean = false;
-	let sel_interval: number = getInterval(501);
+	export let sel_interval: number = getInterval(501);
+	let prev_interval: number;
+	let disabled: boolean = false;
 
-	/*
-    			<!-- <button
-				class="menu-item"
-				role="menuitemradio"
-				data-role="menuitem"
-				aria-label="Turn off auto refresh"
-				aria-checked="false"
-				tabindex="-1"
-				><div class="text-wrap">
-					<span class="text-wrap">Off</span>
-					<div class="css-84nudp"></div>
-				</div></button
-			> -->
-            */
 
 	function expand() {
 		expanded = expanded ? false : true;
 	}
-
 </script>
 
-<div class="self-end">
-	<div class="relative inline-flex">
+<div class="">
+	<div class="flex">
 		<button
-			class="toolbar-button"
+			class="relative inline-flex min-w-14 toolbar-button"
 			title="Choose refresh time interval"
 			tabindex="0"
 			on:click={expand}
-			><div class="button-pre-exp">{msToString(sel_interval, " ")}</div>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 24 24"
-				width="16"
-				height="16"
-				class="svg-chevron"
-				><path
-					d="M17,9.17a1,1,0,0,0-1.41,0L12,12.71,8.46,9.17a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.42l4.24,4.24a1,1,0,0,0,1.42,0L17,10.59A1,1,0,0,0,17,9.17Z"
-				></path></svg
-			></button
-		>
+			><div class="button-pre-exp font-mono antialiased">
+				{#if !disabled}
+					{msToString(sel_interval, ' ')}
+				{:else}
+					Off
+				{/if}
+			</div>
+			<div class="justify-end">
+				{#if !expanded}
+					<div transition:fade={{ duration: 200 }}>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							width="16"
+							height="16"
+							class="svg-chevron absolute"
+							><path
+								d="M17,9.17a1,1,0,0,0-1.41,0L12,12.71,8.46,9.17a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.42l4.24,4.24a1,1,0,0,0,1.42,0L17,10.59A1,1,0,0,0,17,9.17Z"
+							></path></svg
+						>
+					</div>
+				{:else}
+					<div transition:fade={{ duration: 200 }}>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							width="16"
+							height="16"
+							class="svg-chevron absolute"
+							><path
+								d="M17,13.41,12.71,9.17a1,1,0,0,0-1.42,0L7.05,13.41a1,1,0,0,0,0,1.42,1,1,0,0,0,1.41,0L12,11.29l3.54,3.54a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29A1,1,0,0,0,17,13.41Z"
+							></path></svg
+						>
+					</div>
+				{/if}
+			</div>
+		</button>
 	</div>
 	{#if expanded}
-		<div transition:fade={{ duration: 200 }}
+		<div
+			transition:fade={{ duration: 200 }}
 			tabindex="-1"
-			class="fixed"
+			class="absolute"
 			style="z-index: 1111; transform: translate(-7px, 0px); will-change: transform;"
 		>
 			<span data-focus-scope-start="true"></span>
 			<div tabindex="-1" class="menu-container" role="menu">
+					{#if disabled}
+						<button
+							class="menu-item font-mono font-semibold text-neutral-300 antialiased bg-neutral-500 hover:bg-neutral-600"
+							title="Turn off auto refresh"
+							tabindex="-1"
+							on:click={() => {
+								sel_interval = prev_interval;
+								disabled = false;
+								expanded = false;
+							}}
+							><div class="text-wrap-flow">
+								<span class="text-wrap">Off</span>
+							</div></button
+						>
+					{:else}
+						<button
+							class="menu-item font-mono font-semibold text-neutral-300 antialiased hover:bg-neutral-500"
+							title="Turn off auto refresh"
+							tabindex="-1"
+							on:click={() => {
+								prev_interval = sel_interval;
+								sel_interval = -1;
+								closeWS();
+								disabled = true;
+								expanded = false;
+							}}
+							><div class="text-wrap-flow">
+								<span class="text-wrap">Off</span>
+							</div></button
+						>
+					{/if}
 				{#each Interval as value}
-					<button
-						class="menu-item"
-						title={String(value) + ' milliseconds'}
-						tabindex="-1" 
-						on:click={() => {sel_interval=value}}
-						><div class="text-wrap">
-							<span class="text-wrap">{msToString(value)}</span>
-						</div></button
-					>
+					{#if value == sel_interval && !disabled}
+						<button
+							class="menu-item font-mono font-semibold text-neutral-300 antialiased bg-neutral-500 hover:bg-neutral-600"
+							title={String(value) + ' milliseconds'}
+							tabindex="-1"
+							on:click={() => {
+								sel_interval = value;
+								expanded = false;
+									disabled = false;
+							}}
+							><div class="text-wrap-flow">
+								<span class="text-wrap">{msToString(value)}</span>
+							</div></button
+						>
+					{:else}
+						<button
+							class="menu-item font-mono font-semibold text-neutral-300 antialiased hover:bg-neutral-500"
+							title={String(value) + ' milliseconds'}
+							tabindex="-1"
+							on:click={() => {
+								sel_interval = value;
+								expanded = false;
+									disabled = false;
+							}}
+							><div class="text-wrap-flow">
+								<span class="text-wrap">{msToString(value)}</span>
+							</div></button
+						>
+					{/if}
 				{/each}
 			</div>
 			<span data-focus-scope-end="true"></span>
@@ -73,10 +138,8 @@
 
 <style>
 	.menu-item {
-		background: none;
 		cursor: pointer;
 		white-space: nowrap;
-		color: rgb(204, 204, 220);
 		display: flex;
 		flex-direction: column;
 		-moz-box-align: stretch;
@@ -99,7 +162,7 @@
 		gap: 8px;
 	}
 
-	.text-wrap {
+	.text-wrap-flow {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -113,21 +176,12 @@
 		padding: 4px 0px;
 	}
 
-	.menu-container:hover {
-		background: rgb(171, 173, 176);
-		box-shadow: rgb(1, 4, 9) 0px 8px 24px;
-		display: inline-block;
-		border-radius: 2px;
-		padding: 4px 0px;
-	}
-
 	.toolbar-button {
 		position: relative;
 		display: flex;
 		-moz-box-align: center;
 		align-items: center;
 		height: 32px;
-		padding: 0px 8px;
 		border-radius: 2px;
 		line-height: 30px;
 		font-weight: 500;
@@ -154,5 +208,6 @@
 		flex-shrink: 0;
 		line-height: 0;
 		vertical-align: middle;
+		transform: translate(-5px, -6.5px);
 	}
 </style>

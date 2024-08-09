@@ -19,7 +19,7 @@ const app = uws.App().ws('/*', {
     /* Handlers */
     upgrade: (res, req, context) => {
         console.log('An Http connection wants to become WebSocket, URL: ' + req.getUrl() + '!');
-
+        // TODO: Only upgrade if path exists
         res.upgrade({
             data: req.getUrl()
         },
@@ -32,11 +32,12 @@ const app = uws.App().ws('/*', {
     open: (ws) => {
         console.log('A WebSocket connected with URL: ' + ws.data);
         ws.send("Hi new connection!")
-        if ( ws.data === "/tracks" ) {
+        if ( ws.data === "/tracks/500" ) {
             if (!ws.subscribe('tracks')) {
                 ws.end(500)
             }
         } else {
+            ws.send("404 Not Found")
             ws.end(404)
         }
     },

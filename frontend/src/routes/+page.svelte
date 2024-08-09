@@ -3,26 +3,31 @@
 	import PlaneContainer from '$lib/components/PlaneContainer.svelte';
 	import { tracks } from '$lib/stores/trackStore';
 	import { browser } from '$app/environment';
-	import { initWS } from '$lib/util/ws_util';
+	import { changeChannel } from '$lib/util/ws_util';
 	import TimeSelector from '$lib/components/TimeSelector.svelte';
+	import { getInterval } from '$lib/util/time_util';
 
 	let bool: boolean = false;
+	let interval: number = 500;
+
+	$: {
+		if (browser) {
+        	changeChannel(String(getInterval(interval)));
+		}
+    }
 
 	function change_state() {
 		bool = !bool;
 	}
 
-	if (browser) {
-		initWS('sxmaa.net:9001', 'tracks');
-	}
 </script>
-<div id="menu-bar" class="flex w-screen flex-row-reverse pe-4">
-	<TimeSelector></TimeSelector>
+
+<div id="menu-bar" class="flex flex-row-reverse mr-8">
+	<TimeSelector bind:sel_interval={interval}></TimeSelector>
 </div>
 
-<main class="flex h-screen flex-col items-center justify-center">
-	
-	<img src="/favicon.png" class="w-32 drop-shadow-xl" alt="o7 Logo" />
+<main class="flex h-auto p-20 flex-col items-center justify-center">
+	<img src="/favicon.png" class="w-32 drop-shadow-xl" alt="Logo"/>
 	<h1 class="text-3xl font-bold">Welcome to WS-Track</h1>
 	<h2 class="my-6 text-2xl">Status:</h2>
 	<div id="main" class="flex max-w-5xl justify-center gap-4 px-3">
