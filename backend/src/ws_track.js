@@ -1,17 +1,30 @@
 // @ts-check
 import uws from '../dist/uws.js';
 import Plane from '../../common/model/Plane.js'
+import { WebSocketChannel } from './lib/model/WSChannel.js';
+import { randomInt } from './lib/util.js';
+import { Interval } from '../../common/lib/time_util.js';
 
 const PORT = 9001;
+const TICK_RATE = 25;
+const UPDATE_PER_TICK = 100;
+const MAX_X = 1600;
+const MAX_Y = 900;
+const MAX_PLANES = 250;
+
+/**
+ * @type {Map<number, Plane>}
+ */
+export const planes = new Map();
+
+/**
+ * @type {Array<WebSocketChannel>}
+ */
+let ws_track_channels = [];
 
 
-const planes = new Map();
-let track_updates = [];
 
-generateInitial()
-
-
-const app = uws.App().ws('/*', {
+export const app = uws.App().ws('/*', {
     /* Options */
     compression: uws.SHARED_COMPRESSOR,
     maxPayloadLength: 16 * 1024 * 1024,
@@ -29,14 +42,23 @@ const app = uws.App().ws('/*', {
             context);
 
     },
-    open: (ws) => {
+    open: (/** @type {{ data: string; send: (arg0: string) => void; subscribe: (arg0: any) => any; end: (arg0: number) => void; "": any; }} */ ws) => {
         console.log('A WebSocket connected with URL: ' + ws.data);
         ws.send("Hi new connection!")
-        if ( ws.data === "/tracks/500" ) {
-            if (!ws.subscribe('tracks')) {
+        /**
+         * @type {false | string}
+         */
+        let channel_state = channelExists(ws.data);
+        if ( channel_state != false ) {
+            if (!ws.subscribe(channel_state)) {
+                // Something went wrong while subscribing this client to the new channel
                 ws.end(500)
+            } else {
+                // Send inital state of all planes to this new client
+                ws.send(collectState())
             }
         } else {
+            console.log("E404: consumer tried to subscribe to nonexistent channel " + ws.data)
             ws.send("404 Not Found")
             ws.end(404)
         }
@@ -62,69 +84,86 @@ const app = uws.App().ws('/*', {
 });
 
 async function main() {
+    generateInitial();
+    // Build the ws channels
+    for (const interval of Interval) {
+        ws_track_channels.push(new WebSocketChannel(interval))
+    }
+    //ws_track_channels.push(new WebSocketChannel(500))
+    // Enable the ws channels
+    for (const channel of ws_track_channels) {
+        channel.enable();
+    }
+
     while (true) {
         await /** @type {Promise<void>} */(new Promise((resolve) => {
-            let subs = app.numSubscribers('tracks');
-            if ( subs > 0 ) {
                 //steps = steps >= 1000 ? 0 : steps + 1;
-                // Construct ws message
-                let message = "";
-                let next_track_update = [];
-                for (const id of track_updates) {
-                    let plane = planes.get(id);
-                    message += `${id},${plane.x},${plane.y};`;
-                    if ((plane.x < 0 || plane.y < 0) || (plane.x > 1000 || plane.y > 1000)) {
-                        planes.set(id, new Plane(randomInt(0,1000), randomInt(0,1000), id))
-                        next_track_update.push(id);
-                    }
-                }
-                app.publish('tracks', message);
+                
+                // TODO: Add some kind of OOB detection
+                /*if (plane.x < 0 || plane.y < 0 || plane.x > 1000 || plane.y > 1000) {
+                    planes.set(id, new Plane(randomInt(0, 1000), randomInt(0, 1000), id));
+                }*/
 
-                track_updates = next_track_update.slice();
-                next_track_update = [];
-                for (let i = 1; i <= 1000; i++) { 
-                    let id = randomInt(1,1000)
+                // Generate random changes
+                let uni_track_updates = [];
+                for (let i = 1; i <= UPDATE_PER_TICK; i++) { 
+                    let id = randomInt(1,MAX_PLANES)
                     let plane = planes.get(id)
                     if (plane) {
                         plane.x += randomInt(-5,5)
                         plane.y += randomInt(-5,5)
-                        track_updates.push(id)
+
+                        uni_track_updates.push(id)
                     } else {
-                        planes.set(id, new Plane(randomInt(0,1000), randomInt(0,1000), id))
+                        planes.set(id, new Plane(randomInt(0,MAX_X), randomInt(0,MAX_Y), id))
                     }
                 }
 
-            }
-            // @ts-ignore
-            process.stdout.clearLine(0);
-            // @ts-ignore
-            process.stdout.cursorTo(0);
-            // @ts-ignore
-            process.stdout.write(
-                "subs: " + subs
-            );
+                // Append new track updates to all channels
+                for (const channel of ws_track_channels) {
+                    //if (channel.update_interval == 500) console.log("Pushing " + uni_track_updates.length + " tracks to 500")
+                    channel.append_track_updates(uni_track_updates);
+                }
+
+
             setTimeout(() => {
                 resolve()
-            }, 500);
+            }, TICK_RATE);
         }));
     }
 }
 
 
 function generateInitial() {
-    for (let i = 1; i <= 1000; i++) { 
-        planes.set(i, new Plane(randomInt(0,1000), randomInt(0,1000), i))
-        track_updates.push(i)
+    for (let i = 1; i <= MAX_PLANES; i++) { 
+        planes.set(i, new Plane(randomInt(0,MAX_X), randomInt(0,MAX_Y), i))
     }
-    console.log("a")
 }
 
 /**
- * @param {number} min
- * @param {number} max
+ * 
+ * @param {string} channel Name of targeted ws channel
+ * @returns {false | string}
  */
-function randomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+function channelExists(channel) {
+    // Remove leading /
+    channel = channel.replace(/^\//m, "");
+    for (const ws_channel of ws_track_channels) {
+        //console.log("Comparing channel " + ws_channel.ws_channel_id + " to requested " + channel)
+        if (ws_channel.ws_channel_id === channel) return channel;
+    }
+    return false;
+}
+
+/**
+ * @returns {string}
+ */
+function collectState() {
+    let message = "";
+    for (const [, plane] of planes) {
+        message += `${plane.id},${plane.x},${plane.y};`;
+    }
+    return message;
 }
 
 main();

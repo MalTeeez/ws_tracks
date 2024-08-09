@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getInterval, Interval, msToString } from '$lib/util/time_util';
+	import { getInterval, Interval, msToString } from '../../../../common/lib/time_util';
 	import { closeWS } from '$lib/util/ws_util';
 	import { fade } from 'svelte/transition';
 

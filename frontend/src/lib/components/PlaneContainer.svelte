@@ -5,14 +5,16 @@
 
 	const {
 		planes,
+		inter_speed,
 	}: {
 		planes: Writable<Map<number, Plane>>;
+		inter_speed: number;
 	} = $props();
 </script>
 
 <div class="static">
 	{#each $planes as [id, plane]}
-		<Track {plane}>
+		<Track {plane} {inter_speed}>
 			{id}
 		</Track>
 	{/each}

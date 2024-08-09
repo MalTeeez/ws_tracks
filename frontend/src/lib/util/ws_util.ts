@@ -5,17 +5,19 @@ import { parseTrackString } from './parse_util';
 
 let ws: WebSocket;
 let base_url: string = "sxmaa.net:9001/tracks";
+let curr_interval: number;
 
 export function closeWS() {
 	if (ws) ws.close();
 }
 
-export function changeChannel(channel: string) {
-	console.log("Switching channel to " + channel)
+export function changeChannel(channel: number) {
+	curr_interval = channel;
+	console.log("Switching interval channel to " + channel)
 	if (ws) {
 		ws.close();
 	}
-	initWS(base_url, channel);
+	initWS(base_url, String(channel));
 	if (ws) {
 		ws.reconnect();
 	}
@@ -79,4 +81,8 @@ export function get_ws_state(ws: WebSocket): string {
         state_tag += 'from-rose-400 to-red-600">ERRORED';
     }
     return (state_tag += '</div>');
+}
+
+export function get_current_interval(): number {
+	return curr_interval;
 }

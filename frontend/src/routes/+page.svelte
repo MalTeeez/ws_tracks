@@ -5,14 +5,14 @@
 	import { browser } from '$app/environment';
 	import { changeChannel } from '$lib/util/ws_util';
 	import TimeSelector from '$lib/components/TimeSelector.svelte';
-	import { getInterval } from '$lib/util/time_util';
+	import { getInterval } from '../../../common/lib/time_util.js';
 
 	let bool: boolean = false;
-	let interval: number = 500;
+	export let interval: number = 500;
 
 	$: {
 		if (browser) {
-        	changeChannel(String(getInterval(interval)));
+        	changeChannel(getInterval(interval));
 		}
     }
 
@@ -29,9 +29,9 @@
 <main class="flex h-auto p-20 flex-col items-center justify-center">
 	<img src="/favicon.png" class="w-32 drop-shadow-xl" alt="Logo"/>
 	<h1 class="text-3xl font-bold">Welcome to WS-Track</h1>
-	<h2 class="my-6 text-2xl">Status:</h2>
+	<h2 class="my-6 text-2xl">Status</h2>
 	<div id="main" class="flex max-w-5xl justify-center gap-4 px-3">
-		<NextStep title="Websocket Connection">
+		<!-- <NextStep title="Websocket Connection">
 			{#if bool}
 				<p
 					class="font-sans font-semibold underline decoration-2 decoration-sky-500/[.33] text-center"
@@ -62,9 +62,9 @@
 			>
 				Hi!
 			</button>
-		</NextStep>
+		</NextStep> -->
 
-		<PlaneContainer planes={tracks}></PlaneContainer>
+		<PlaneContainer planes={tracks} inter_speed={interval}></PlaneContainer>
 	</div>
 </main>
 
