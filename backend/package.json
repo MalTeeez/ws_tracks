@@ -1,6 +1,7 @@
 {
   "name": "wstrack-backend",
   "version": "1.0.0",
+  "author": "Mika Hensel",
   "description": "",
   "main": "src/ws_track.js",
   "type": "module",
@@ -9,6 +10,8 @@
     "start": "node ."
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "prometheus-query": "^3.4.0"
+  }
 }

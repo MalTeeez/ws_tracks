@@ -1,6 +1,7 @@
 //@ts-check
 import Plane from "../../../../common/model/Plane.js";
 import { app, planes } from "../../ws_track.js";
+import { plane_to_message } from "../general_util.js";
 
 /**
  * @class
@@ -69,12 +70,14 @@ export class WebSocketChannel {
       for (const id of this.track_updates) {
         let plane = planes.get(id);
         if (plane) {
-          message += `${id},${plane.x},${plane.y};`;
+          message += plane_to_message(plane);
         }
       }
       //console.log("Sending out " + this.track_updates.size + " tracks on channel " + this.ws_channel_id)
-      // And send it out to listeners
-      app.publish(this.ws_channel_id, message);
+      // And send it out to listeners (only if it has entries)
+      if (this.track_updates.size > 0) {
+        app.publish(this.ws_channel_id, message);
+      }
     }
     // Clear the updates afterwards, so we dont have them stacking up for nothing
     if (!this.updating) {

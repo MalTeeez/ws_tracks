@@ -2,11 +2,11 @@
 import uws from '../dist/uws.js';
 import Plane from '../../common/model/Plane.js'
 import { WebSocketChannel } from './lib/model/WSChannel.js';
-import { randomInt } from './lib/util.js';
 import { Interval } from '../../common/lib/time_util.js';
+import { plane_to_message, update_tracks_prometheus, update_tracks_randomly } from './lib/general_util.js';
 
 const PORT = 9001;
-const TICK_RATE = 25;
+const TICK_RATE = 250;
 const UPDATE_PER_TICK = 100;
 const MAX_X = 1600;
 const MAX_Y = 900;
@@ -15,7 +15,7 @@ const MAX_PLANES = 250;
 /**
  * @type {Map<number, Plane>}
  */
-export const planes = new Map();
+export let planes = new Map();
 
 /**
  * @type {Array<WebSocketChannel>}
@@ -84,7 +84,7 @@ export const app = uws.App().ws('/*', {
 });
 
 async function main() {
-    generateInitial();
+    //generateInitial();
     // Build the ws channels
     for (const interval of Interval) {
         ws_track_channels.push(new WebSocketChannel(interval))
@@ -96,28 +96,13 @@ async function main() {
     }
 
     while (true) {
-        await /** @type {Promise<void>} */(new Promise((resolve) => {
-                //steps = steps >= 1000 ? 0 : steps + 1;
-                
-                // TODO: Add some kind of OOB detection
-                /*if (plane.x < 0 || plane.y < 0 || plane.x > 1000 || plane.y > 1000) {
-                    planes.set(id, new Plane(randomInt(0, 1000), randomInt(0, 1000), id));
-                }*/
+        await /** @type {Promise<void>} */(new Promise(async (resolve) => {
+                // TODO: Add track deletion messages to clients (see update_tracks_prometheus ending)
 
-                // Generate random changes
-                let uni_track_updates = [];
-                for (let i = 1; i <= UPDATE_PER_TICK; i++) { 
-                    let id = randomInt(1,MAX_PLANES)
-                    let plane = planes.get(id)
-                    if (plane) {
-                        plane.x += randomInt(-5,5)
-                        plane.y += randomInt(-5,5)
-
-                        uni_track_updates.push(id)
-                    } else {
-                        planes.set(id, new Plane(randomInt(0,MAX_X), randomInt(0,MAX_Y), id))
-                    }
-                }
+                // Get new changes
+                console.time('update_tracks')
+                let uni_track_updates = await update_tracks_prometheus(planes);
+                console.timeEnd('update_tracks')
 
                 // Append new track updates to all channels
                 for (const channel of ws_track_channels) {
@@ -133,12 +118,6 @@ async function main() {
     }
 }
 
-
-function generateInitial() {
-    for (let i = 1; i <= MAX_PLANES; i++) { 
-        planes.set(i, new Plane(randomInt(0,MAX_X), randomInt(0,MAX_Y), i))
-    }
-}
 
 /**
  * 
@@ -161,7 +140,7 @@ function channelExists(channel) {
 function collectState() {
     let message = "";
     for (const [, plane] of planes) {
-        message += `${plane.id},${plane.x},${plane.y};`;
+        message += plane_to_message(plane);
     }
     return message;
 }

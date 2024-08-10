@@ -1,6 +1,7 @@
 {
 	"name": "wstrack-frontend",
 	"version": "1.0.0",
+	"author": "Mika Hensel",
 	"type": "module",
 	"scripts": {
 		"build": "vite build",
