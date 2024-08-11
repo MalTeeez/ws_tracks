@@ -1,83 +1,83 @@
 //@ts-check
 import Plane from "../../../common/model/Plane.js";
-import { planes } from "../ws_track.js";
 import { queryInstant } from "./prom_util.js";
-import { deepEqual, randomInt } from "./general_util.js"
+import { utf16_to_utf8, deep_equal, generateRandomString, random_int, utf8_to_utf16, random_float } from "../../../common/lib/general_util.js";
 
 /**
  * Update tracks with randomly generated ones (+-5 moves)
- * @param {Map<number,Plane>} track_list A reference to a map containing the previous state
+ * @param {Map<string,Plane>} track_list A reference to a map containing the previous state
  * @param {number} update_amount The amount of the times tracks you want to update each time
  * @param {number} max_x The maximum X value of your planes
  * @param {number} max_y The maximum Y value of your p
- * @returns {Array<number>} A list of id's from the track_list that were updated
+ * @returns {Array<string>} A list of id's from the track_list that were updated
  */
 export function update_tracks_randomly(track_list, update_amount, max_x, max_y) {
-    /**
-     * @type {Array<number>}
-     */
-    let uni_track_updates = [];
-    for (let i = 1; i <= update_amount; i++) {
-        let id = String(randomInt(1, update_amount));
-        let plane = track_list.get(id);
-        if (plane && plane.x && plane.y) {
-            plane.x += randomInt(-5, 5);
-            plane.y += randomInt(-5, 5);
+  /**
+   * @type {Array<string>}
+   */
+  let uni_track_updates = [];
+  for (let i = 1; i <= update_amount; i++) {
+    let id = String(random_int(1, update_amount));
+    let plane = track_list.get(id);
+    if (plane && plane.x_lon && plane.y_lat) {
+      plane.x_lon += random_int(-5, 5);
+      plane.y_lat += random_int(-5, 5);
 
-            uni_track_updates.push(id);
-        } else {
-            track_list.set(id, new Plane(id, randomInt(0, max_x), randomInt(0, max_y)));
-        }
+      uni_track_updates.push(id);
+    } else {
+      track_list.set(id, new Plane(id, random_int(0, max_x), random_int(0, max_y)));
     }
-    return uni_track_updates;
+  }
+  return uni_track_updates;
 }
 
 /**
  * Update tracks with randomly generated ones (+-5 moves)
- * @param {Map<number,Plane>} track_list A reference to a map containing the previous state
- * @returns {Promise<Array<number>>} A list of id's from the track_list that were updated
+ * @param {Map<string,Plane>} track_list A reference to a map containing the previous state
+ * @returns {Promise<Array<string>>} A list of id's from the track_list that were updated
  */
 export async function update_tracks_prometheus(track_list) {
-    /**
-     * @type {Array<number>}
-     */
-    let uni_track_updates = [];
-    const prom_tracks = await queryInstant();
+  /**
+   * @type {Array<string>}
+   */
+  let uni_track_updates = [];
+  const prom_tracks = await queryInstant();
 
-    if (prom_tracks) {
-        for (const [id, plane] of prom_tracks.entries()) {
-            const plane_is_known = track_list.has(id);
-            if ((plane_is_known && !deepEqual(plane, track_list.get(id))) || !plane_is_known) {
-                // Track is known but has an old state OR track is "new"
-                track_list.set(id, plane);
-                uni_track_updates.push(id);
-            }
-        }
-        if (track_list.size != prom_tracks.size) {
-            // Prometheus has removed a track that we still keep, so we need to delete it
-            for (const id of track_list.keys()) {
-                if (!prom_tracks.has(id)) {
-                    planes.delete(id);
-                    //console.log("Removed out-of-date track " + id);
-                }
-            }
-        }
+  if (prom_tracks) {
+    for (const [id, plane] of prom_tracks.entries()) {
+      const plane_is_known = track_list.has(id);
+      if ((plane_is_known && !deep_equal(plane, track_list.get(id))) || !plane_is_known) {
+        // Track is known but has an old state OR track is "new"
+        track_list.set(id, plane);
+        uni_track_updates.push(id);
+      }
     }
-    //console.log("Prometheus had " + uni_track_updates.length + " track updates");
-    return uni_track_updates;
+    if (track_list.size != prom_tracks.size) {
+      // Prometheus has removed a track that we still keep, so we need to delete it
+      for (const id of track_list.keys()) {
+        if (!prom_tracks.has(id)) {
+          track_list.delete(id);
+          //console.log("Removed out-of-date track " + id);
+        }
+      }
+    }
+  }
+  //console.log("Prometheus had " + uni_track_updates.length + " track updates");
+  return uni_track_updates;
 }
 
 /**
  * Generate a set number of fake plane tracks and fill a provided map with them
- * @param {Map<number, Plane>} planes Your provided map
+ * @param {Map<string, Plane>} planes Your provided map
  * @param {number} max_tracks The amount of tracks to generate
- * @param {number} max_x The maximum X value of your planes
- * @param {number} max_y The maximum Y value of your planes
+ * @param {number} [max_x] The maximum X value of your planes
+ * @param {number} [max_y] The maximum Y value of your planes
  */
 export function generateInitial(planes, max_tracks, max_x, max_y) {
-    for (let i = 1; i <= max_tracks; i++) {
-        planes.set(i, new Plane(String(i), randomInt(0, max_x), randomInt(0, max_y)));
-    }
+  for (let i = 1; i <= max_tracks; i++) {
+    const id = generateRandomString(7);
+    planes.set(id, new Plane(id, random_float(-180, 180, 5), random_float(-180, 180, 5)));
+  }
 }
 
 /**
@@ -86,5 +86,79 @@ export function generateInitial(planes, max_tracks, max_x, max_y) {
  * @returns {string} The ws update message
  */
 export function plane_to_message(plane) {
-    return `${plane.id},${plane.x},${plane.y};`;
+  return `${plane.id},${plane.x_lon},${plane.y_lat};`;
+}
+
+/**
+ * Convert a list of track updates to an ArrayBuffer of tracks
+ * This function is a wrapper for tracks_to_buffer()
+ * @param {Set<string>} track_updates Your track updates array filled with ids
+ * @param {Map<string,Plane>} plane_list A reference to a map containing the previous state
+ * @returns {ArrayBuffer} Your ArrayBuffer filled with tracks
+ */
+export function track_updates_to_buffer(track_updates, plane_list) {
+  const updated_planes = new Map();
+  track_updates.forEach((id) => {
+    const plane = plane_list.get(id);
+    if (plane) {
+      updated_planes.set(id, plane)
+    }
+  });
+  return tracks_to_buffer(updated_planes);
+}
+
+/**
+ * Convert a Map of tracks to an ArrayBuffer of tracks
+ * @param {Map<string, Plane>} tracks Your track Map filled with planes
+ * @returns {ArrayBuffer} Your ArrayBuffer filled with tracks
+ */
+export function tracks_to_buffer(tracks) {
+  let buffer = new ArrayBuffer(tracks.size * 15);
+
+  let i = 0;
+  for (const id of tracks.keys()) {
+    //                      n-th entry * sizeof entry
+    let dataView = new DataView(buffer, i * 15, 15);
+
+    // Go through each char of the id, and append that onto our array
+    let o = 0;
+    for (const char of utf16_to_utf8(id)) {
+      dataView.setUint8(o, char);
+      o++;
+    }
+
+    // Append our coords
+    let track = tracks.get(id);
+    if (track) {
+      /// Longitude
+      dataView.setInt32(7, track.get_lon_int());
+      /// Latitude
+      dataView.setInt32(11, track.get_lat_int());
+    }
+    // Go to the next plane
+    i++;
+  }
+  return buffer;
+}
+
+/**
+ * Convert an ArrayBuffer of tracks to a Map of tracks
+ * @param {ArrayBuffer} buffer Your ArrayBuffer filled with tracks
+ * @returns {Map<string, Plane>} Your track Map filled with planes
+ */
+export function buffer_to_tracks(buffer) {
+  let tracks = new Map();
+
+  for (let i = 0; i < buffer.byteLength / 15; i += 15) {
+    //                      n-th entry * sizeof entry
+    let dataView = new DataView(buffer, i * 15, 15);
+
+    const id = utf8_to_utf16(new Uint8Array(buffer, i, 7));
+    const lon = dataView.getInt32(7) / 100000;
+    const lat = dataView.getInt32(11) / 100000;
+
+    tracks.set(id, new Plane(id, lon, lat))
+  }
+
+  return tracks;
 }

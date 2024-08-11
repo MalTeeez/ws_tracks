@@ -15,7 +15,7 @@
 </script>
 
 <div class="">
-	<div class="flex">
+	<div class="flex px-2 pr-4 rounded-md bg-[#24282e] drop-shadow-xl">
 		<button
 			class="relative inline-flex min-w-14 toolbar-button"
 			title="Choose refresh time interval"
@@ -64,7 +64,7 @@
 			transition:fade={{ duration: 200 }}
 			tabindex="-1"
 			class="absolute"
-			style="z-index: 1111; transform: translate(-7px, 0px); will-change: transform;"
+			style="z-index: 1111; transform: translate(3px, 0px); will-change: transform;"
 		>
 			<span data-focus-scope-start="true"></span>
 			<div tabindex="-1" class="menu-container" role="menu">
@@ -169,7 +169,7 @@
 	}
 
 	.menu-container {
-		background: rgb(24, 27, 31);
+		background: #181b1f;
 		box-shadow: rgb(1, 4, 9) 0px 8px 24px;
 		display: inline-block;
 		border-radius: 2px;

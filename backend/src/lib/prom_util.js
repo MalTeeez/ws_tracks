@@ -10,9 +10,9 @@ const prom = new PrometheusDriver({
 export async function queryInstant() {
     const q = "point_list";
     try {
-        console.time('http_req')
+        //console.time('http_req')
         const res = await prom.instantQuery(q);
-        console.timeEnd('http_req')
+        //console.timeEnd('http_req')
         return labels_to_planes(res.result);
     } catch (error) {
         return console.error(error);
@@ -22,11 +22,11 @@ export async function queryInstant() {
 /**
  * 
  * @param {Array<InstantVector>} series 
- * @returns {Map<number, Plane>}
+ * @returns {Map<string, Plane>}
  */
 function labels_to_fields(series) {
     /**
-     * @type {Map<number, Object>}
+     * @type {Map<string, Object>}
      */
     const map = new Map()
     for (const entry of series) {
@@ -49,11 +49,11 @@ function labels_to_fields(series) {
 /**
  * 
  * @param {Array<InstantVector>} series 
- * @returns {Map<number, Plane>}
+ * @returns {Map<string, Plane>}
  */
 function labels_to_planes(series) {
     /**
-     * @type {Map<number, Plane>}
+     * @type {Map<string, Plane>}
      */
     const map = new Map()
     for (const entry of series) {

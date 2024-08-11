@@ -1,10 +1,10 @@
-import { tracks } from '$lib/stores/trackStore';
+import { tracks, track_update_count } from '$lib/stores/trackStore';
 import { WebSocket } from 'partysocket';
 import Plane from '../../../../common/model/Plane';
-import { parseTrackString } from './parse_util';
+import { parse_track_buffer } from './parse_util';
 
 let ws: WebSocket;
-let base_url: string = "sxmaa.net:9001/tracks";
+let base_url: string = 'sxmaa.net:9001/tracks';
 let curr_interval: number;
 
 export function closeWS() {
@@ -13,24 +13,28 @@ export function closeWS() {
 
 export function changeChannel(channel: number) {
 	curr_interval = channel;
-	console.log("Switching interval channel to " + channel)
+	console.log('Switching interval channel to ' + channel);
 	if (ws) {
 		ws.close();
 	}
 	initWS(base_url, String(channel));
+	track_update_count.update(() => {return 0})
 	if (ws) {
 		ws.reconnect();
 	}
 }
 
 function initWS(base: string, channel: string) {
-    base_url = base;
-	ws = new WebSocket("ws://" + base_url + "/" + channel, [], {startClosed: true});
-    add_listeners(ws);
+	base_url = base;
+	ws = new WebSocket('ws://' + base_url + '/' + channel, [], {
+		startClosed: true,
+	});
+	ws.binaryType = 'arraybuffer';
+	add_listeners(ws);
 }
 
 function add_listeners(ws: WebSocket) {
-    ws.addEventListener('open', () => {
+	ws.addEventListener('open', () => {
 		console.log('WS opened');
 	});
 
@@ -42,45 +46,50 @@ function add_listeners(ws: WebSocket) {
 }
 
 function handle_track_update(event: MessageEvent) {
-	const track_updates: Plane[] = parseTrackString(event.data);
+	if (event.data.byteLength % 15 != 0) {
+		console.warn("Received faulty track update with data: ", event.data)
+	} else {
+		const track_updates: Plane[] = parse_track_buffer(event.data);
 
-	tracks.update((tracks) => {
-		for (const track of track_updates) {
-			if (tracks.has(track.id)) {
-				// Plane already exists, so we just have to change its coords
-				let old_plane: Plane | undefined = tracks.get(track.id);
-				if (old_plane) {
-					old_plane.x = track.x;
-					old_plane.y = track.y;
+		track_update_count.update((count) => {count += track_updates.length; return count })
+		tracks.update((tracks) => {
+			for (const track of track_updates) {
+				if (tracks.has(track.id)) {
+					// Plane already exists, so we just have to change its coords
+					let old_plane: Plane | undefined = tracks.get(track.id);
+					if (old_plane) {
+						old_plane.x_lon = track.x_lon;
+						old_plane.y_lat = track.y_lat;
+					}
+				} else {
+					// Plane is new, so we can take the instantiated one
+					tracks.set(track.id, track);
 				}
-			} else {
-				// Plane is new, so we can take the instantiated one
-				tracks.set(track.id, track);
 			}
-		}
 
-		return tracks;
-	});
+			return tracks;
+		});
+	}
 }
 
 export function get_ws_state(ws: WebSocket): string {
-    //if (!browser) return '<div class="bg-gradient-to-r inline-block text-center from-sky-400 to-red-500">CONNECTING</div>'#
-    console.log('Websocket status changed: ' + ws.readyState);
-    let state_tag = '<div class="bg-gradient-to-r inline-block';
-    if (ws.readyState == ws.CLOSED) {
-        if (ws.retryCount > 0) {
-            state_tag += 'from-purple-400 to-violet-500">RECONNECTING';
-        } else {
-            state_tag += 'from-amber-400 to-orange-500">DISCONNECTED';
-        }
-    } else if (ws.readyState == ws.CONNECTING) {
-        state_tag += 'from-sky-400 to-blue-500">CONNECTING';
-    } else if (ws.readyState == ws.OPEN) {
-        state_tag += 'from-lime-400 to-greeen-500">CONNECTED';
-    } else {
-        state_tag += 'from-rose-400 to-red-600">ERRORED';
-    }
-    return (state_tag += '</div>');
+	//if (!browser) return '<div class="bg-gradient-to-r inline-block text-center from-sky-400 to-red-500">CONNECTING</div>'#
+	console.log('Websocket status changed: ' + ws.readyState);
+	let state_tag = '<div class="bg-gradient-to-r inline-block';
+	if (ws.readyState == ws.CLOSED) {
+		if (ws.retryCount > 0) {
+			state_tag += 'from-purple-400 to-violet-500">RECONNECTING';
+		} else {
+			state_tag += 'from-amber-400 to-orange-500">DISCONNECTED';
+		}
+	} else if (ws.readyState == ws.CONNECTING) {
+		state_tag += 'from-sky-400 to-blue-500">CONNECTING';
+	} else if (ws.readyState == ws.OPEN) {
+		state_tag += 'from-lime-400 to-greeen-500">CONNECTED';
+	} else {
+		state_tag += 'from-rose-400 to-red-600">ERRORED';
+	}
+	return (state_tag += '</div>');
 }
 
 export function get_current_interval(): number {

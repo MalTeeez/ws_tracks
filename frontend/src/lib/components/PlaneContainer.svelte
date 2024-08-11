@@ -7,7 +7,7 @@
 		planes,
 		inter_speed,
 	}: {
-		planes: Writable<Map<number, Plane>>;
+		planes: Writable<Map<string, Plane>>;
 		inter_speed: number;
 	} = $props();
 </script>

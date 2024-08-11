@@ -17,8 +17,8 @@
 </script>
 
 <div
-	class="absolute"
-	style="top: {plane.y}px; left: {plane.x}px; transition: all {msToCSS(
+	class="absolute z-50"
+	style="top: {plane.y_lat}px; left: {plane.x_lon}px; transition: all {msToCSS(
 		inter_speed,
 	)} linear;"
 >

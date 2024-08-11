@@ -50,8 +50,8 @@
       "configureAll": false
     },
     {
-      "command": "npm start; exit 0",
-      "name": "Run npm start in debug terminal",
+      "command": "node ${file}; exit 0",
+      "name": "Run node on current file in debug terminal",
       "request": "launch",
       "type": "node-terminal",
       "cwd": "${fileDirname}"
