@@ -4,24 +4,24 @@ export default class Plane {
   x;
   y;
   /**
-   * @type {number}
+   * @type {number | undefined}
    */
   rotation;
   /**
-   * @type {number}
+   * @type {number | undefined}
    */
   altitude;
   /**
-   * @type {number}
+   * @type {number | undefined}
    */
   airspeed;
   /**
-   * @type {number}
+   * @type {number | undefined}
    */
   rate_of_climb;
   /**
    * Create a new Plane object
-   * @param {number} id id of this plane
+   * @param {string} id id of this plane
    * @param {number} [x] position X
    * @param {number} [y] position Y
    * @param {number} [rotation]

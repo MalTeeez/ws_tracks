@@ -3,7 +3,7 @@ import uws from '../dist/uws.js';
 import Plane from '../../common/model/Plane.js'
 import { WebSocketChannel } from './lib/model/WSChannel.js';
 import { Interval } from '../../common/lib/time_util.js';
-import { plane_to_message, update_tracks_prometheus, update_tracks_randomly } from './lib/general_util.js';
+import { plane_to_message, update_tracks_prometheus, update_tracks_randomly } from './lib/track_util.js';
 
 const PORT = 9001;
 const TICK_RATE = 250;

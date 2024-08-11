@@ -1,7 +1,7 @@
 //@ts-check
 import Plane from "../../../../common/model/Plane.js";
 import { app, planes } from "../../ws_track.js";
-import { plane_to_message } from "../general_util.js";
+import { plane_to_message } from "../track_util.js";
 
 /**
  * @class

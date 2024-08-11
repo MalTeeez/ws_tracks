@@ -12,3 +12,4 @@ UI to display plane tracks from a time-independent datasource
 - [ ] oh god how am I gonna make maps
 - [ ] per id requests (with http) for historic data to draw tracks
 - [ ] per person requests (with http) [later]
+- [ ] generate ids from strings to reduce .has check overheads
