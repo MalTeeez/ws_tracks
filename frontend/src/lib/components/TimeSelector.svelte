@@ -210,4 +210,4 @@
 		vertical-align: middle;
 		transform: translate(-5px, -6.5px);
 	}
-</style>
+</style>	

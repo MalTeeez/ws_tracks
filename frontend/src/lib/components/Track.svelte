@@ -32,7 +32,7 @@
 
 <style>
 	.dot {
-		background: yellow;
+		background: red;
 		border-radius: 4em;
 		box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.4);
 		position: relative;
