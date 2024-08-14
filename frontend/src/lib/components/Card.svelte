@@ -14,7 +14,7 @@
 <div class="relative">
 	<button class="absolute top-2 right-2 z-30">
 		<svg
-			class="fill-slate-400"
+			class="fill-slate-400 cursor-pointer pointer-events-auto"
 			width="24"
 			height="24"
 			viewBox="0 0 1000 1000"
@@ -24,11 +24,12 @@
 			/></svg
 		>
 	</button>
-	<section
+	<!-- right-0 -->
+	<section 
 		id="card"
-		class="flex mx-auto left-0 right-0 max-w-52 min-w-60 min-h-[22.6rem] flex-col gap-2 py-6 px-8 drop-shadow-xl text-center backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90"
+		class="flex mx-auto left-0 top-0 min-w-52 max-w-60 min-h-[22.6rem] flex-col gap-2 py-6 px-8 drop-shadow-xl text-center backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90"
 	>
-		<h1 class="mb-2 text-xl text-center font-bold">{title}</h1>
+		<h1 class="mb-2 text-xl text-center font-bold select-none">{title}</h1>
 		<div class="flex flex-col gap-4">
 			{@render children()}
 		</div>

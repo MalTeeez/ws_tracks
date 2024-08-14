@@ -18,35 +18,40 @@
 		}
 	}
 </script>
-<Map></Map>
-<div class="top-0 left-0 size-full absolute">
-	<div class="relative size-full">
-		
+
+
+<div class="top-0 left-0 size-full absolute pointer-events-none">
+	<div class="relative size-full pointer-events-none">
 		<!--- Place everything under here !--->
 		<div id="header" class="w-auto absolute z-50 top-2 right-6">
 			<div id="menu-bar">
 				<TimeSelector bind:sel_interval={interval}></TimeSelector>
 			</div>
 		</div>
-		
-		<div id="plane_div" class="absolute size-full z-20 top-0 left-0">
+
+		<div id="plane_div" class="absolute size-full top-0 left-0">
 			<PlaneContainer planes={tracks} inter_speed={interval}></PlaneContainer>
 		</div>
-		<div class="w-auto relative z-30 left-0 right-0 top-1/4 overflow-hidden">
+		<div class="relative z-30 w-fit left-0 top-[18%] overflow-hidden">
 			<div
 				id="center_content"
-				class="static flex flex-col items-center gap-y-4"
+				class="static flex flex-col items-center gap-y-4 px-8"
 			>
-				<img src="/favicon.png" class="w-32 drop-shadow-xl" alt="Logo" />
-				<h1 style="filter: drop-shadow(2px 2px 2px #000000);" class="text-3xl font-semibold font-mono">Welcome to WS-Track!</h1>
+				<img src="/favicon.png" class="w-32 drop-shadow-xl select-none" alt="Logo" />
+				<h1
+					style="filter: drop-shadow(2px 2px 2px #000000);"
+					class="text-3xl font-semibold font-mono select-none max-w-60 text-center"
+				>
+					Welcome to WS-Track!
+				</h1>
 				<div class="relative shadow-xl overflow-hidden rounded-lg">
 					<Card title="Websocket Connection">
-						<p>
+						<p class="select-none">
 							We are currently tracking <code class="text-sky-300"
 								>{$tracks.size}</code
 							> planes.
 						</p>
-						<p>
+						<p class="select-none">
 							And have received <code class="text-pink-500"
 								>{$track_update_count}</code
 							>
@@ -55,7 +60,7 @@
 						</p>
 						<br />
 						<button
-							class="clicks ring-2 ring-sky-500 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900"
+							class="clicks ring-2 ring-sky-500 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900 pointer-events-auto"
 							on:click={() => {
 								bool = !bool;
 							}}
@@ -78,13 +83,17 @@
 					<div class="absolute -z-40">
 						<BarAnimation inter_speed={interval * 10}></BarAnimation>
 					</div>
-					<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 top-0 right-0"></div> -->
-					<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 bottom-0 left-0"></div> -->
+
 				</div>
-			</div>
+			</div> 
 		</div>
+		<Map></Map>
 	</div>
 </div>
+
+
+					<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 top-0 right-0"></div> -->
+					<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 bottom-0 left-0"></div> -->
 
 <style>
 	code {

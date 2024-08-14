@@ -15,7 +15,7 @@
 <div class="static">
 	{#each $planes as [id, plane]}
 		<Track {plane} {inter_speed}>
-			{id}
+			<p class="select-none">{id}</p>
 		</Track>
 	{/each}
 </div>

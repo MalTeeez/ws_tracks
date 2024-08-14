@@ -4,6 +4,11 @@
 	import { msToCSS } from '../../../../common/lib/time_util.js';
 
 	let size: number = 0.5;
+	let color = $state('#ff0000');
+
+	function changeColor() {
+		color = color === '#ff0000' ? '#0044ff' : '#ff0000';
+	}
 
 	const {
 		plane,
@@ -17,14 +22,29 @@
 </script>
 
 <div
-	class="absolute z-50"
+	class="absolute z-20"
 	style="top: {plane.y_lat}px; left: {plane.x_lon}px; transition: all {msToCSS(
 		inter_speed,
 	)} linear;"
 >
-	<div class="dot" style="width: {size}rem; height: {size}rem;"></div>
 	<div
-		class="antialiased font-mono text-xs font-semibold text-left text-sky-400 cursor-default"
+		class="dot pointer-events-auto"
+		style="width: {size}rem; height: {size}rem; background-color: {color}; "
+		role="button"
+		tabindex="0"
+		onmouseover={changeColor}
+		onmouseleave={() => {
+			new Promise<void>((resolve) => {
+				setTimeout(() => {
+					changeColor();
+					resolve()}, 0
+				);
+			});
+		}}
+		onfocus={() => {}}
+	></div>
+	<div
+		class="antialiased font-mono text-xs font-semibold text-left text-sky-400"
 	>
 		{@render children()}
 	</div>
@@ -32,7 +52,6 @@
 
 <style>
 	.dot {
-		background: red;
 		border-radius: 4em;
 		box-shadow: 2px 2px 4px 1px rgba(0, 0, 0, 0.4);
 		position: relative;

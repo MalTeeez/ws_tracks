@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { getInterval, Interval, msToString } from '../../../../common/lib/time_util';
+	import {
+		getInterval,
+		Interval,
+		msToString,
+	} from '../../../../common/lib/time_util';
 	import { closeWS } from '$lib/util/ws_util';
 	import { fade } from 'svelte/transition';
 
@@ -8,57 +12,57 @@
 	let prev_interval: number;
 	let disabled: boolean = false;
 
-
 	function expand() {
 		expanded = expanded ? false : true;
 	}
 </script>
 
-<div class="">
-	<div class="flex px-2 pr-4 rounded-md bg-[#24282e] drop-shadow-xl">
-		<button
-			class="relative inline-flex min-w-14 toolbar-button"
-			title="Choose refresh time interval"
-			tabindex="0"
-			on:click={expand}
-			><div class="button-pre-exp font-mono antialiased">
-				{#if !disabled}
-					{msToString(sel_interval, ' ')}
-				{:else}
-					Off
-				{/if}
-			</div>
-			<div class="justify-end">
-				{#if !expanded}
-					<div transition:fade={{ duration: 200 }}>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="16"
-							height="16"
-							class="svg-chevron absolute"
-							><path
-								d="M17,9.17a1,1,0,0,0-1.41,0L12,12.71,8.46,9.17a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.42l4.24,4.24a1,1,0,0,0,1.42,0L17,10.59A1,1,0,0,0,17,9.17Z"
-							></path></svg
-						>
-					</div>
-				{:else}
-					<div transition:fade={{ duration: 200 }}>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 24 24"
-							width="16"
-							height="16"
-							class="svg-chevron absolute"
-							><path
-								d="M17,13.41,12.71,9.17a1,1,0,0,0-1.42,0L7.05,13.41a1,1,0,0,0,0,1.42,1,1,0,0,0,1.41,0L12,11.29l3.54,3.54a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29A1,1,0,0,0,17,13.41Z"
-							></path></svg
-						>
-					</div>
-				{/if}
-			</div>
-		</button>
-	</div>
+<div class="flex rounded-md bg-[#24282e] drop-shadow-xl pointer-events-auto">
+	<button
+		class="relative px-2 pr-4 inline-flex min-w-14 toolbar-button"
+		title="Choose refresh time interval"
+		tabindex="0"
+		on:click={expand}
+		><div class="button-pre-exp font-mono antialiased">
+			{#if !disabled}
+				{msToString(sel_interval, ' ')}
+			{:else}
+				Off
+			{/if}
+		</div>
+		<div class="justify-end">
+			{#if !expanded}
+				<div transition:fade={{ duration: 200 }}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						width="16"
+						height="16"
+						class="svg-chevron absolute"
+						><path
+							d="M17,9.17a1,1,0,0,0-1.41,0L12,12.71,8.46,9.17a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.42l4.24,4.24a1,1,0,0,0,1.42,0L17,10.59A1,1,0,0,0,17,9.17Z"
+						></path></svg
+					>
+				</div>
+			{:else}
+				<div transition:fade={{ duration: 200 }}>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						width="16"
+						height="16"
+						class="svg-chevron absolute"
+						><path
+							d="M17,13.41,12.71,9.17a1,1,0,0,0-1.42,0L7.05,13.41a1,1,0,0,0,0,1.42,1,1,0,0,0,1.41,0L12,11.29l3.54,3.54a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29A1,1,0,0,0,17,13.41Z"
+						></path></svg
+					>
+				</div>
+			{/if}
+		</div>
+	</button>
+</div>
+
+<div class="pointer-events-auto">
 	{#if expanded}
 		<div
 			transition:fade={{ duration: 200 }}
@@ -68,37 +72,37 @@
 		>
 			<span data-focus-scope-start="true"></span>
 			<div tabindex="-1" class="menu-container" role="menu">
-					{#if disabled}
-						<button
-							class="menu-item font-mono font-semibold text-neutral-300 antialiased bg-neutral-500 hover:bg-neutral-600"
-							title="Turn off auto refresh"
-							tabindex="-1"
-							on:click={() => {
-								sel_interval = prev_interval;
-								disabled = false;
-								expanded = false;
-							}}
-							><div class="text-wrap-flow">
-								<span class="text-wrap">Off</span>
-							</div></button
-						>
-					{:else}
-						<button
-							class="menu-item font-mono font-semibold text-neutral-300 antialiased hover:bg-neutral-500"
-							title="Turn off auto refresh"
-							tabindex="-1"
-							on:click={() => {
-								prev_interval = sel_interval;
-								sel_interval = -1;
-								closeWS();
-								disabled = true;
-								expanded = false;
-							}}
-							><div class="text-wrap-flow">
-								<span class="text-wrap">Off</span>
-							</div></button
-						>
-					{/if}
+				{#if disabled}
+					<button
+						class="menu-item font-mono font-semibold text-neutral-300 antialiased bg-neutral-500 hover:bg-neutral-600"
+						title="Turn off auto refresh"
+						tabindex="-1"
+						on:click={() => {
+							sel_interval = prev_interval;
+							disabled = false;
+							expanded = false;
+						}}
+						><div class="text-wrap-flow">
+							<span class="text-wrap">Off</span>
+						</div></button
+					>
+				{:else}
+					<button
+						class="menu-item font-mono font-semibold text-neutral-300 antialiased hover:bg-neutral-500"
+						title="Turn off auto refresh"
+						tabindex="-1"
+						on:click={() => {
+							prev_interval = sel_interval;
+							sel_interval = -1;
+							closeWS();
+							disabled = true;
+							expanded = false;
+						}}
+						><div class="text-wrap-flow">
+							<span class="text-wrap">Off</span>
+						</div></button
+					>
+				{/if}
 				{#each Interval as value}
 					{#if value == sel_interval && !disabled}
 						<button
@@ -108,7 +112,7 @@
 							on:click={() => {
 								sel_interval = value;
 								expanded = false;
-									disabled = false;
+								disabled = false;
 							}}
 							><div class="text-wrap-flow">
 								<span class="text-wrap">{msToString(value)}</span>
@@ -122,7 +126,7 @@
 							on:click={() => {
 								sel_interval = value;
 								expanded = false;
-									disabled = false;
+								disabled = false;
 							}}
 							><div class="text-wrap-flow">
 								<span class="text-wrap">{msToString(value)}</span>
@@ -210,4 +214,4 @@
 		vertical-align: middle;
 		transform: translate(-5px, -6.5px);
 	}
-</style>	
+</style>

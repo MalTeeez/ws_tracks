@@ -101,3 +101,27 @@ export function generateRandomString(length) {
   }
   return string;
 }
+
+
+/* FROM https://developers.google.com/maps/documentation/tile/2d-tiles-overview
+var TILE_SIZE = 256;
+
+function fromLatLngToPoint(latLng) {
+  var mercator = -Math.log(Math.tan((0.25 + latLng.lat() / 360) * Math.PI));
+  return {
+    x: TILE_SIZE * (latLng.lng() / 360 + 0.5),
+    y: TILE_SIZE / 2 * (1 +  mercator / Math.PI)
+  };
+}
+
+function fromLatLngToTileCoord(latLng, zoom) {
+  var point = fromLatLngToPoint(latLng);
+  var scale = Math.pow(2, zoom);
+
+  return {
+    x: Math.floor(point.x * scale / TILE_SIZE),
+    y: Math.floor(point.y * scale / TILE_SIZE),
+    z: zoom
+  };
+}
+*/

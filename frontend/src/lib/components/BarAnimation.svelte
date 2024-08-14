@@ -8,12 +8,12 @@
 	} = $props();
 </script>
 
-<div style="animation-duration: {msToCSS(inter_speed)}" class="sun absolute rounded">
-	<div style="animation-duration: {msToCSS(inter_speed)}" class="dot rounded-lg"></div>
+<div style="animation-duration: {msToCSS(inter_speed)}" class="bar-outer absolute rounded">
+	<div style="animation-duration: {msToCSS(inter_speed)}" class="bar-inner rounded-lg"></div>
 </div>
 
 <style>
-	.dot {
+	.bar-inner {
         width: 70%;
         height: 100%;
         animation-iteration-count: infinite;
@@ -22,12 +22,12 @@
          /*background: linear-gradient(0deg, rgba(255,0,0,1) 50%, rgba(0,212,255,1) 50%);*/
 	}
 
-	.sun {
+	.bar-outer {
 		position: absolute;
 		width: 0.5rem;
 		height: 26rem;
         animation-iteration-count: infinite;
-		animation-timing-function: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+		animation-timing-function: linear;
 		animation-name: slide;
 		/* top: 26rem; */
 		/* left: -2rem; */
@@ -46,10 +46,10 @@
 
     @keyframes color {
         from {
-            background-color: rgb(3, 30, 88);
+            background-color: rgb(231, 255, 14);
 		}
 		to {
-            background-color: rgb(13, 239, 247);
+            background-color: rgb(255, 218, 8);
 		}
 		
 	}
