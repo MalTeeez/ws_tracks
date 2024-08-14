@@ -39,8 +39,8 @@ export default class Plane {
   /**
    * Create a new Plane object
    * @param {string} id id of this plane
-   * @param {number} [x_lon] position X
-   * @param {number} [y_lat] position Y
+   * @param {number} x_lon position X
+   * @param {number} y_lat position Y
    * @param {number} [rotation]
    * @param {number} [altitude]
    * @param {number} [rate_of_climb]
@@ -48,8 +48,8 @@ export default class Plane {
    */
   constructor(id, x_lon, y_lat, rotation, altitude, airspeed, rate_of_climb) {
     this.id = id;
-    if (x_lon) this.x_lon = x_lon;
-    if (y_lat) this.y_lat = y_lat;
+    this.x_lon = x_lon;
+    this.y_lat = y_lat;
 
     if (rotation) this.rotation = rotation;
     if (altitude) this.altitude = altitude;

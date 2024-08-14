@@ -46,10 +46,10 @@
 
     @keyframes color {
         from {
-            background-color: rgb(231, 255, 14);
+            background-color: rgb(242, 243, 236);
 		}
 		to {
-            background-color: rgb(255, 218, 8);
+            background-color: rgb(252, 248, 228);
 		}
 		
 	}

@@ -63,7 +63,7 @@ function labels_to_planes(series) {
         const type = translate_property(entry.metric.labels.type);
         const value = entry.value.value;
         if (!map.has(id)) {
-            let plane = new Plane(id)
+            let plane = new Plane(id, 0, 0)
             if (type) {
                 plane[type] = value;
                 map.set(id, plane)

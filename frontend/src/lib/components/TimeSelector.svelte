@@ -78,9 +78,11 @@
 						title="Turn off auto refresh"
 						tabindex="-1"
 						on:click={() => {
-							sel_interval = prev_interval;
 							disabled = false;
 							expanded = false;
+							let prev_interval = sel_interval;
+							sel_interval = -1;
+							sel_interval = prev_interval;
 						}}
 						><div class="text-wrap-flow">
 							<span class="text-wrap">Off</span>
@@ -92,8 +94,6 @@
 						title="Turn off auto refresh"
 						tabindex="-1"
 						on:click={() => {
-							prev_interval = sel_interval;
-							sel_interval = -1;
 							closeWS();
 							disabled = true;
 							expanded = false;
@@ -110,6 +110,9 @@
 							title={String(value) + ' milliseconds'}
 							tabindex="-1"
 							on:click={() => {
+								if (disabled) {
+									sel_interval = -1;
+								}
 								sel_interval = value;
 								expanded = false;
 								disabled = false;
@@ -124,6 +127,9 @@
 							title={String(value) + ' milliseconds'}
 							tabindex="-1"
 							on:click={() => {
+								if (disabled) {
+									sel_interval = -1;
+								}
 								sel_interval = value;
 								expanded = false;
 								disabled = false;
