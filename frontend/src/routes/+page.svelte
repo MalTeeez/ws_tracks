@@ -18,21 +18,18 @@
 		}
 	}
 
-	let outerWidth = 0;
-	let outerHeight = 0;
-
-    $: console.log(outerWidth + " + " + outerHeight)
-
+	let innerWidth = 0;
+	let innerHeight = 0;
 
 </script>
 
-<svelte:window bind:outerWidth bind:outerHeight/>
+<svelte:window bind:innerWidth bind:innerHeight/>
 
 <div class="top-0 left-0 size-full absolute pointer-events-none overflow-hidden">
 	<div class="relative size-full pointer-events-none">
 		<!--- Place everything under here !--->
 		<!-- START OF DEBUG ELEMENTS --> 
-		<div class="absolute top-1/4 right-1/4 text-6xl z-50 bg-black">w: {outerWidth} , h: {outerHeight}</div>
+		<div class="absolute top-1/4 right-1/4 text-6xl z-50 bg-black">w: {innerWidth} , h: {innerHeight}</div>
 		<div class="absolute top-1/2 w-full h-1 bg-red-700 z-10"></div>
 		<div class="absolute left-1/2 w-1 h-full bg-red-700 z-10"></div>
 		<!--  END OF DEBUG ELEMENTS -->	

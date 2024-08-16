@@ -13,7 +13,7 @@
 </script>
 
 <div class="static">
-	{#each $planes as [id, plane]}
+	{#each $planes as [id, plane] (id)}
 		<Track {plane} {inter_speed}>
 			<p class="select-none">{id}</p>
 		</Track>

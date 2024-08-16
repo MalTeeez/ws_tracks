@@ -50,12 +50,12 @@ function handle_track_update(event: MessageEvent) {
 		console.warn("Received faulty track update with data: ", event.data)
 	} else {
 		const track_updates: Plane[] = parse_track_buffer(event.data);
-
+		
 		track_update_count.update((count) => {count += track_updates.length; return count })
 		tracks.update((tracks) => {
 			for (const track of track_updates) {
 				if (tracks.has(track.id)) {
-					// Plane already exists, so we just have to change its coords
+					// Plane already exists, but we have to replace it to update the svelte reactions
 					let old_plane: Plane | undefined = tracks.get(track.id);
 					if (old_plane) {
 						old_plane.x_lon = track.x_lon;

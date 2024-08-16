@@ -1,16 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import Plane from '../../../../common/model/Plane.js';
-	import { msToCSS } from '../../../../common/lib/time_util.js';
 	import TrackCard from './TrackCard.svelte';
+	import { tweened } from 'svelte/motion';
+	import { linear } from 'svelte/easing';
 
 	let size: number = 0.5;
 	let color = $state('#ff0000');
 	let selected: boolean = $state(false);
-
-	function changeColor() {
-		color = color === '#ff0000' ? '#0044ff' : '#ff0000';
-	}
 
 	const {
 		plane,
@@ -21,19 +18,36 @@
 		inter_speed: number;
 		children: Snippet;
 	} = $props();
+
+	function changeColor() {
+		color = color === '#ff0000' ? '#0044ff' : '#ff0000';
+	}
+
+	let x_pos = tweened(plane.x_lon, {
+		duration: inter_speed,
+		easing: linear,
+	});
+
+	let y_pos = tweened(plane.y_lat, {
+		duration: inter_speed,
+		easing: linear,
+	});
+
+	$effect(() => {
+		$x_pos = plane.x_lon;
+		$y_pos = plane.y_lat;
+	})
 </script>
 
 {#if selected}
-	<TrackCard parent_track={plane} parent_x={plane.x_lon} parent_y={plane.y_lat}
+	<TrackCard parent_track={plane} parent_x={$x_pos} parent_y={$y_pos} inter_speed={inter_speed}
 	></TrackCard>
 {/if}
 
 
 <div
-	class="absolute z-20"
-	style="top: {plane.y_lat}px; left: {plane.x_lon}px; transition: all {msToCSS(
-		inter_speed,
-	)} linear;"
+	class="absolute z-25"
+	style="left: {$x_pos}px; top: {$y_pos}px;"
 >
 	<div class="relative">
 		<button
