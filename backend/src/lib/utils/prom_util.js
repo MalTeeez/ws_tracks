@@ -1,6 +1,6 @@
 // @ts-check
 import { InstantVector, PrometheusDriver } from "prometheus-query";
-import Plane, { translate_property } from "../../../common/model/Plane.js";
+import Plane, { translate_property } from "../../../../common/model/Plane.js";
 
 const prom = new PrometheusDriver({
   endpoint: "http://localhost:9092",

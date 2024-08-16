@@ -40,7 +40,7 @@
 </script>
 
 {#if selected}
-	<TrackCard parent_track={plane} parent_x={$x_pos} parent_y={$y_pos} inter_speed={inter_speed}
+	<TrackCard parent_track={plane} parent_x={$x_pos} parent_y={$y_pos} inter_speed={inter_speed} bind:selected={selected}
 	></TrackCard>
 {/if}
 

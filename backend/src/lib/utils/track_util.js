@@ -1,7 +1,7 @@
 //@ts-check
-import Plane from "../../../common/model/Plane.js";
+import Plane from "../../../../common/model/Plane.js";
 import { queryInstant } from "./prom_util.js";
-import { utf16_to_utf8, deep_equal, generateRandomString, random_int, utf8_to_utf16, random_float } from "../../../common/lib/general_util.js";
+import { utf16_to_utf8, deep_equal, generateRandomString, random_int, utf8_to_utf16, random_float } from "../../../../common/lib/general_util.js";
 
 /**
  * Update tracks with randomly generated ones (+-5 moves)

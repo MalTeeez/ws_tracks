@@ -29,9 +29,9 @@
 	<div class="relative size-full pointer-events-none">
 		<!--- Place everything under here !--->
 		<!-- START OF DEBUG ELEMENTS --> 
-		<div class="absolute top-1/4 right-1/4 text-6xl z-50 bg-black">w: {innerWidth} , h: {innerHeight}</div>
-		<div class="absolute top-1/2 w-full h-1 bg-red-700 z-10"></div>
-		<div class="absolute left-1/2 w-1 h-full bg-red-700 z-10"></div>
+		<div class="absolute top-1/4 right-1/4 text-6xl z-50 bg-black select-none">w: {innerWidth} , h: {innerHeight}</div>
+		<!-- <div class="absolute top-1/2 w-full h-1 bg-red-700 z-10" draggable="false"></div> -->
+		<!-- <div class="absolute left-1/2 w-1 h-full bg-red-700 z-10" draggable="false"></div> -->
 		<!--  END OF DEBUG ELEMENTS -->	
 
 

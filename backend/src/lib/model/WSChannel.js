@@ -1,6 +1,7 @@
 //@ts-check
-import { app, planes } from "../../ws_track.js";
-import { plane_to_message, track_updates_to_buffer, tracks_to_buffer } from "../track_util.js";
+import Plane from "../../../../common/model/Plane.js";
+import { app } from "../../ws_track.js";
+import { track_updates_to_buffer } from '../utils/track_util.js';
 
 /**
  * @class
@@ -10,6 +11,10 @@ export class WebSocketChannel {
    * @type {number}
    */
   update_interval;
+  /**
+  * @type {Map<string, Plane>}
+  */
+  plane_state_tracker;
   /**
    * @type {string}
    */
@@ -28,11 +33,12 @@ export class WebSocketChannel {
   updating;
 
   /**
-   *
    * @param {number} update_interval
+   * @param {Map<string, Plane>} plane_state_tracker
    */
-  constructor(update_interval) {
+  constructor(update_interval, plane_state_tracker) {
     this.update_interval = update_interval;
+    this.plane_state_tracker = plane_state_tracker;
     this.ws_channel_id = "tracks/" + update_interval;
     this.active = false;
     this.updating = false;
@@ -56,7 +62,7 @@ export class WebSocketChannel {
   }
 
   disable() {
-    this.updating = false;
+    this.active = false;
   }
 
   tick() {
@@ -69,7 +75,7 @@ export class WebSocketChannel {
       /**
        * @type {ArrayBuffer}
        */
-      const message = track_updates_to_buffer(this.track_updates, planes)
+      const message = track_updates_to_buffer(this.track_updates, this.plane_state_tracker)
       //console.log("Sending out " + this.track_updates.size + " tracks on channel " + this.ws_channel_id)
       // And send it out to listeners (only if it has entries)
       if (this.track_updates.size > 0) {
