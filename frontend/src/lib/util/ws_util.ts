@@ -1,4 +1,4 @@
-import { tracks, track_update_count } from '$lib/stores/trackStore';
+import { tracks, track_update_count } from '$lib/stores/tracks';
 import { WebSocket } from 'partysocket';
 import Plane from '../../../../common/model/Plane';
 import { parse_track_buffer } from './parse_util';

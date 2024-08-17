@@ -1,6 +1,7 @@
 import {
     quickCloseResponse,
 } from '../lib/utils/uws_util.js';
+import { TRACK_SERVER } from '../ws_track.js';
 
 export default {
     info: async function info(res, req) {
@@ -18,27 +19,23 @@ export default {
             return;
         }
 
-        const track = 
-        if () {
-            try {
-                await checkAuth(req, res);
-            } catch (err) {
-                quickCloseResponse(res, "401", err.message);
-                return;
-            }
+        const track = TRACK_SERVER.getTrackedPlane(track_id)
+        if (track) {
+            res
+                .writeStatus("200")
+                .writeHeader(
+                    "message",
+                    'Successfully found track with id "' + track_id + '".'
+                )
+                .writeHeader('content-type', 'application/json')
+                .writeHeader("Access-Control-Allow-Origin", "*")
+                .writeHeader("Access-Control-Allow-Headers", "*")
+                .writeHeader("Access-Control-Expose-Headers", "*")
+                .end(JSON.stringify(track));
+        } else {
+            quickCloseResponse(res, "404", "Plane or Track not found.");
+            return;
         }
 
-        // Return video from db with uid
-        res
-            .writeStatus("200")
-            .writeHeader(
-                "message",
-                'Successfully found video with id "' + video.uid + '".'
-            )
-            .writeHeader('content-type', 'application/json')
-            .writeHeader("Access-Control-Allow-Origin", "*")
-            .writeHeader("Access-Control-Allow-Headers", "*")
-            .writeHeader("Access-Control-Expose-Headers", "*")
-            .end(JSON.stringify(video));
     },
 }

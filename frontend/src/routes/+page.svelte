@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Card from '$lib/components/Card.svelte';
 	import PlaneContainer from '$lib/components/PlaneContainer.svelte';
-	import { tracks, track_update_count } from '$lib/stores/trackStore';
+	import { tracks, track_update_count } from '$lib/stores/tracks';
 	import { browser } from '$app/environment';
 	import { changeChannel } from '$lib/util/ws_util';
 	import TimeSelector from '$lib/components/TimeSelector.svelte';
@@ -35,7 +35,7 @@
 		<!--  END OF DEBUG ELEMENTS -->	
 
 
-		<div id="header" class="w-auto absolute z-50 top-2 right-6">
+		<div id="header" class="w-auto absolute z-40 top-2 right-6">
 			<div id="menu-bar">
 				<TimeSelector bind:sel_interval={interval}></TimeSelector>
 			</div>
@@ -99,7 +99,7 @@
 				</div>
 			</div> 
 		</div>
-		<!-- <Map></Map> -->
+		<Map></Map>
 	</div>
 </div>
 

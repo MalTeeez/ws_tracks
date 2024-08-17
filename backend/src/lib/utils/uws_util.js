@@ -2,7 +2,10 @@
 * AUTHOR: Mika Hensel - 2024
 */
 
+import { Interval } from '../../../../common/lib/time_util.js';
 import uws from '../../../dist/uws.js'
+import { TRACK_SERVER } from '../../ws_track.js';
+
 
 /**
  * Reads the body from a HttpResponse into a raw buffer
@@ -36,6 +39,7 @@ export async function readBody(res) {
     quickCloseResponse(res, "400", "Failed to parse body.");
   }
 }
+
 
 /**
  * Reads the body from a HttpResponse into a JSON object
@@ -77,6 +81,7 @@ export async function readJsonBody(res) {
   }
 }
 
+
 /**
  * Reads the body from a multipart HttpRequest into a Part Object
  * @param {HttpReponse} res An uWS HttpReponse object
@@ -115,6 +120,7 @@ export async function readMultipart(res, header) {
     quickCloseResponse(res, "400", "Failed to parse Multipart.");
   }
 }
+
 
 /**
  * Patch a http reponse to better handle false ends and aborts
@@ -244,6 +250,7 @@ function safetyPatchRes(res) {
   };
 }
 
+
 /**
  * Encase an async HttpResponse handler in a "net" to prevent early ends, missing aborts and more.
  * @param {*} handler The async handler of type (HttpReponse, HttpRequest)
@@ -262,6 +269,7 @@ export const uWSAsyncHandler = (handler) => async (res, req) => {
     console.log("uWS Async Handler failed while waiting. Error: " + err);
   }
 };
+
 
 /**
  * Quickly finish a HttpResponse object with status and header
@@ -292,22 +300,63 @@ export function getIP(req) {
 
 /**
  * Upgrade a http connection to a ws connection, and append the context (url) for the websocket
- * @param {HttpRequest} res The uWS HttpResponse object
+ * @param {HttpResponse} res The uWS HttpResponse object
  * @param {HttpRequest} req The uWS HttpRequest object
  * @param {*} context 
  */
-export function upgradeWsConnection(res, req, context) {
-  console.log("An Http connection wants to become WebSocket, URL: " + req.getUrl() + "!");
-  // TODO: Only upgrade if path exists
-  res.upgrade(
-    {
-      data: req.getUrl(),
-    },
-    req.getHeader("sec-websocket-key"),
-    req.getHeader("sec-websocket-protocol"),
-    req.getHeader("sec-websocket-extensions"),
-    context
-  );
+export async function upgradeWsConnection(res, req, context) {
+  console.log('A HTTP connection wants to a become WebSocket, URL: ' + req.getUrl() + '!');
+
+  /* Keep track of abortions */
+  const upgradeState = { aborted: false, upgrading: false };
+
+  /* You MUST copy data out of req here, as req is only valid within this immediate callback */
+  const url = req.getUrl();
+  const secWebSocketKey = req.getHeader('sec-websocket-key');
+  const secWebSocketProtocol = req.getHeader('sec-websocket-protocol');
+  const secWebSocketExtensions = req.getHeader('sec-websocket-extensions');
+
+  res.onAborted(() => {
+    upgradeState.aborted = true;
+  });
+
+  /* Do our async work */
+  new Promise(async (resolve, reject) => {
+    for (const interval of Interval) {
+      if (url == "/tracks/" + interval) {
+        resolve()
+      }
+    }
+    reject("404", "WS channel " + url + " does not exist or can't be subscribed to.")
+  }).then(() => {
+    if (!upgradeState.aborted) {
+      res.cork(() => {
+        upgradeState.upgrading = true;
+        /* This immediately calls open handler, we can not use res after this call */
+        res.upgrade(
+          { url: url },
+          /* Use our copies here */
+          secWebSocketKey,
+          secWebSocketProtocol,
+          secWebSocketExtensions,
+          context
+        );
+      });
+      return;
+    } else {
+      console.log("Client disconnected before we could upgrade it!");
+      return;
+    }
+  }).catch((/** @type {string} */ message) => {
+    if (!upgradeState.aborted) {
+      console.log("WS upgrade failed with: ", message)
+      if (!upgradeState.upgrading) {
+        res.cork(() => {
+          quickCloseResponse(res, "400", message)
+        });
+      }
+    }
+  })
 }
 
 
@@ -316,23 +365,22 @@ export function upgradeWsConnection(res, req, context) {
  * @param {WebSocket<UserData>} ws The uWS WebSocket Object
  */
 export function openWsConnection(ws) {
-  console.log("A WebSocket connected with URL: " + ws.data);
+  console.log("A WebSocket connected with URL: " + ws.url);
   ws.send("Hi new connection!");
   /**
    * @type {false | string}
    */
-  let channel_state = channelExists(ws.data);
+  let channel_state = TRACK_SERVER.channelExists(ws.url);
   if (channel_state != false) {
     if (!ws.subscribe(channel_state)) {
       // Something went wrong while subscribing this client to the new channel
       ws.end(500);
     } else {
       // Send inital state of all planes to this new client
-      ws.send(collectState(), true, true);
+      ws.send(TRACK_SERVER.collectState(), true, true);
     }
   } else {
-    console.log("E404: consumer tried to subscribe to nonexistent channel " + ws.data);
-    ws.send("404 Not Found");
-    ws.end(404);
+    console.log("Consumer tried to subscribe to nonexistent channel " + ws.url);
+    ws.end(404, "Channel not found.");
   }
 }

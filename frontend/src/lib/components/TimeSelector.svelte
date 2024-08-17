@@ -30,7 +30,7 @@
 				Off
 			{/if}
 		</div>
-		<div class="justify-end">
+		<div class="pl-1 justify-end">
 			{#if !expanded}
 				<div transition:fade={{ duration: 200 }}>
 					<svg
@@ -68,7 +68,7 @@
 			transition:fade={{ duration: 200 }}
 			tabindex="-1"
 			class="absolute"
-			style="z-index: 1111; transform: translate(3px, 0px); will-change: transform;"
+			style="z-index: 45; transform: translate(3px, 0px); will-change: transform;"
 		>
 			<span data-focus-scope-start="true"></span>
 			<div tabindex="-1" class="menu-container" role="menu">

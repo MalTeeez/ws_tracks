@@ -49,6 +49,13 @@
       "clean": false,
       "configureAll": false
     },
+        {
+      "command": "npm start; sleep 5; exit 0",
+      "name": "Run npm start in debug terminal",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${fileDirname}"
+    },
     {
       "command": "node ${file}; exit 0",
       "name": "Run node on current file in debug terminal",

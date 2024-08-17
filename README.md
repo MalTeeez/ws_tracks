@@ -17,3 +17,4 @@ UI to display plane tracks from a time-independent datasource
 - [ ] keep track moving on longer than update rate wait times with expected speed
 - [x] get page tree layout working without absolute
 - [ ] design track popup window, and fill with http req
+- [ ] create a packet framework, to allow different binary packets

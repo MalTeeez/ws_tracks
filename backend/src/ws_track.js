@@ -16,8 +16,8 @@ APP.ws("/*", {
   maxPayloadLength: 16 * 1024 * 1024,
   idleTimeout: 10,
   /* Handlers */
-  upgrade: (res, req, context) => upgradeWsConnection,
-  open: (ws) => openWsConnection,
+  upgrade: (res, req, context) => upgradeWsConnection(res, req, context),
+  open: (ws) => openWsConnection(ws),
   message: (ws, message, isBinary) => {
     /* Ok is false if backpressure was built up, wait for drain */
     let ok = ws.send(message, isBinary);

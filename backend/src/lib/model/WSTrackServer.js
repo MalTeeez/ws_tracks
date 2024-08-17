@@ -1,7 +1,8 @@
-import Plane from "../../common/model/Plane.js";
+// @ts-check
+import Plane from "../../../../common/model/Plane.js";
 import { WebSocketChannel } from "./WSChannel.js";
-import { Interval } from "../../common/lib/time_util.js";
-import { tracks_to_buffer, update_tracks_prometheus } from "./lib/utils/track_util.js";
+import { Interval } from '../../../../common/lib/time_util.js'
+import { tracks_to_buffer, update_tracks_prometheus } from "../utils/track_util.js";
 
 /**
  * @class
@@ -16,12 +17,12 @@ export class WebSocketTrackServer {
   /**
    * @type {Map<string, Plane>}
    */
-  planes;
+  #planes;
 
   /**
    * @type {Array<WebSocketChannel>}
    */
-  ws_track_channels = [];
+  ws_track_channels;
 
   /**
    * @type {boolean}
@@ -31,13 +32,12 @@ export class WebSocketTrackServer {
   /**
    * Create a new instance of a web socket track server
    * @param {number} tick_rate The amount of milliseconds to wait between every update
-   * @returns {WebSocketTrackServer}
    */
   constructor(tick_rate) {
     this.TICK_RATE = tick_rate;
     this.active = false;
-    this.planes = new Map();
-    return this;
+    this.#planes = new Map();
+    this.ws_track_channels = []
   }
 
   /**
@@ -48,11 +48,11 @@ export class WebSocketTrackServer {
     //generateInitial();
     // Build the ws channels
     for (const interval of Interval) {
-      ws_track_channels.push(new WebSocketChannel(interval, this.planes));
+      this.ws_track_channels.push(new WebSocketChannel(interval, this.#planes));
     }
     //ws_track_channels.push(new WebSocketChannel(500))
     // Enable the ws channels
-    for (const channel of ws_track_channels) {
+    for (const channel of this.ws_track_channels) {
       channel.enable();
     }
     this.active = true;
@@ -62,17 +62,17 @@ export class WebSocketTrackServer {
           // TODO: Add track deletion messages to clients (see update_tracks_prometheus ending)
 
           // Get new changes
-          let uni_track_updates = await update_tracks_prometheus(planes);
+          let uni_track_updates = await update_tracks_prometheus(this.#planes);
 
           // Append new track updates to all channels
-          for (const channel of ws_track_channels) {
+          for (const channel of this.ws_track_channels) {
             //if (channel.update_interval == 500) console.log("Pushing " + uni_track_updates.length + " tracks to 500")
             channel.append_track_updates(uni_track_updates);
           }
 
           setTimeout(() => {
             resolve();
-          }, TICK_RATE);
+          }, this.TICK_RATE);
         })
       );
     }
@@ -93,7 +93,7 @@ export class WebSocketTrackServer {
   channelExists(channel) {
     // Remove leading /
     channel = channel.replace(/^\//m, "");
-    for (const ws_channel of ws_track_channels) {
+    for (const ws_channel of this.ws_track_channels) {
       //console.log("Comparing channel " + ws_channel.ws_channel_id + " to requested " + channel)
       if (ws_channel.ws_channel_id === channel) return channel;
     }
@@ -104,6 +104,15 @@ export class WebSocketTrackServer {
    * @returns {ArrayBuffer}
    */
   collectState() {
-    return tracks_to_buffer(planes);
+    return tracks_to_buffer(this.#planes);
+  }
+
+  /**
+   * Get a plane from the current track store
+   * @param {string} id The 7-char code of the plane to get
+   * @returns {Plane | undefined} The plane object or undefined if it wasnt found 
+   */
+  getTrackedPlane(id) {
+    return this.#planes.get(id);
   }
 }

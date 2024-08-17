@@ -1,6 +1,6 @@
 //@ts-check
 import Plane from "../../../../common/model/Plane.js";
-import { app } from "../../ws_track.js";
+import { APP } from "../../ws_track.js";
 import { track_updates_to_buffer } from '../utils/track_util.js';
 
 /**
@@ -66,7 +66,7 @@ export class WebSocketChannel {
   }
 
   tick() {
-    let subs = app.numSubscribers(this.ws_channel_id);
+    let subs = APP.numSubscribers(this.ws_channel_id);
     //console.log("Channel " + this.ws_channel_id + " started tick to " + subs + " subs") 
     // Only compute and send if we actually have listeners
     if (subs > 0) {
@@ -79,7 +79,7 @@ export class WebSocketChannel {
       //console.log("Sending out " + this.track_updates.size + " tracks on channel " + this.ws_channel_id)
       // And send it out to listeners (only if it has entries)
       if (this.track_updates.size > 0) {
-        app.publish(this.ws_channel_id, message, true, true);
+        APP.publish(this.ws_channel_id, message, true, true);
       }
     }
     // Clear the updates afterwards, so we dont have them stacking up for nothing
