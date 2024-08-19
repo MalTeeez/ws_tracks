@@ -105,7 +105,6 @@
 					updateWhenIdle: true,
 				})
 				.addTo(map_obj);
-
 		}
 	}
 

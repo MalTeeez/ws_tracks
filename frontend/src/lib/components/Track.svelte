@@ -46,7 +46,7 @@
 
 
 <div
-	class="absolute z-25"
+	class="absolute z-20"
 	style="left: {$x_pos}px; top: {$y_pos}px;"
 >
 	<div class="relative">

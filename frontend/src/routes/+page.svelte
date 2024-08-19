@@ -29,9 +29,9 @@
 	<div class="relative size-full pointer-events-none">
 		<!--- Place everything under here !--->
 		<!-- START OF DEBUG ELEMENTS --> 
-		<div class="absolute top-1/4 right-1/4 text-6xl z-50 bg-black select-none">w: {innerWidth} , h: {innerHeight}</div>
-		<!-- <div class="absolute top-1/2 w-full h-1 bg-red-700 z-10" draggable="false"></div> -->
-		<!-- <div class="absolute left-1/2 w-1 h-full bg-red-700 z-10" draggable="false"></div> -->
+		<!-- <div class="absolute top-1/4 right-1/4 text-6xl z-50 bg-black select-none">w: {innerWidth} , h: {innerHeight}</div> -->
+		<div class="absolute top-1/2 w-full h-1 bg-red-700 z-10" draggable="false"></div>
+		<div class="absolute left-1/2 w-1 h-full bg-red-700 z-10" draggable="false"></div>
 		<!--  END OF DEBUG ELEMENTS -->	
 
 
@@ -50,12 +50,12 @@
 				class="static flex flex-col items-center gap-y-4 px-8"
 			>
 				<img src="/favicon.png" class="w-32 drop-shadow-xl select-none" alt="Logo" />
-				<h1
+				<p
 					style="filter: drop-shadow(2px 2px 2px #000000);"
-					class="text-3xl font-semibold font-mono select-none max-w-60 text-center"
+					class="text-3xl font-semibold font-mono select-none max-w-60 text-center px-5"
 				>
 					Welcome to WS-Track!
-				</h1>
+				</p>
 				<div class="relative shadow-xl overflow-hidden rounded-lg">
 					<Card title="Websocket Connection">
 						<p class="select-none">
@@ -99,7 +99,7 @@
 				</div>
 			</div> 
 		</div>
-		<Map></Map>
+		<!-- <Map></Map> -->
 	</div>
 </div>
 
@@ -108,6 +108,8 @@
 					<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 bottom-0 left-0"></div> -->
 
 <style>
+	@tailwind base;
+
 	code {
 		background: theme('colors.zinc.900');
 		padding: theme('spacing[0.5]');

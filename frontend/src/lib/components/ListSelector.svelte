@@ -46,7 +46,7 @@
 			title="Choose a value from the list"
 			tabindex="0"
 			onclick={expand}
-			><div class="button-pre-exp font-mono antialiased">
+			><div class="button-pre-exp font-mono antialiased select-none">
 				{@html selected_display_value}
 			</div>
 			<div class="pl-1 justify-end">
@@ -81,7 +81,7 @@
 		</button>
 	</div>
 
-	<div class="pointer-events-auto">
+	<div class="pointer-events-auto select-none">
 		{#if expanded}
 			<div
 				transition:fade={{ duration: 200 }}

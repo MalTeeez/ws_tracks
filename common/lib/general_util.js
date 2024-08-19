@@ -83,8 +83,10 @@ export function utf16_to_utf8(str) {
 export function utf8_to_utf16(arr) {
   let string = "";
   for (let i = 0; i < arr.length; i++) {
-    // @ts-ignore arr[i] will never go oob, since we dont loop over the length of arr.length
-    string += String.fromCharCode(arr[i]);
+    if ( arr[i] ) {
+      // @ts-ignore arr[i] we just checked that it isnt undefined
+      string += String.fromCharCode(arr[i]);
+    }
   }
   return string;
 }
