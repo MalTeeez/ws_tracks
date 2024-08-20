@@ -58,7 +58,7 @@
 	}
 
 	let mainCardElement: HTMLDivElement;
-	let card_height: number = $state(17.5);
+	let card_height: number = $state(-1);
 	let icon_visibility: string = $state('visible');
 	let is_in_focus: boolean = $state(false);
 
@@ -69,6 +69,8 @@
 	// Calculate line position, angle, length
 	$effect(() => {
 		if (mainCardElement) {
+			card_height = mainCardElement.clientHeight;
+
 			const deltaX = parent_x - $x_pos;
 			const deltaY = parent_y - $y_pos;
 
@@ -78,7 +80,7 @@
 			// Dont let the card get dragged away too far from the track
 			if (
 				line_length >
-				Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)) / 6
+				Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)) / 5
 			) {
 				closeDragElement();
 				has_been_dragged = false;
@@ -98,7 +100,7 @@
 	function elementDrag(event: MouseEvent) {
 		// Move element while onmousemove
 		$x_pos = event.clientX;
-		$y_pos = event.clientY;
+		$y_pos = event.clientY + mainCardElement.clientHeight / 2 - 13;
 		has_been_dragged = true;
 	}
 
@@ -128,7 +130,8 @@
 	<div class="relative true-middle pointer-events-auto">
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
-			class="interpolate-height overflow-hidden min-w-44 max-w-56 drop-shadow-xl backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90 rounded-lg"
+			class="interpolate-height overflow-hidden min-w-60 max-w-64 drop-shadow-xl backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90 rounded-lg"
+			style="height: {card_height}px; max-height: 17.5rem;"
 			role="tooltip"
 			bind:this={mainCardElement}
 			onmousedown={dragMouseDown}
@@ -147,8 +150,8 @@
 							onclick={() => {
 								new Promise(() => {
 									line_color = 'ffffff00';
-									card_height = 0;
 									icon_visibility = 'hidden';
+									card_height = 0;
 									setTimeout(() => {
 										selected = false;
 									}, 250);
@@ -191,9 +194,10 @@
 					</div>
 				</div>
 				<div>
+					<!-- px-2 pb-2 pt-1 -->
 					<div
 					id="info-container"
-						class="bg-blue-400 px-2 pb-2 pt-1 select-none grid grid-cols-2 gap-3 overflow-hidden"
+						class="px-1 pb-1 pt-1 gap-x-1 gap-y-1.5 backdrop-brightness-[0.75] backdrop-blur-xl select-none grid grid-cols-2 overflow-hidden"
 					>
 						<TrackInfo
 							title="Latitude"

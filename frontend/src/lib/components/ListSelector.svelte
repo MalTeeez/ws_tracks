@@ -87,7 +87,7 @@
 				transition:fade={{ duration: 200 }}
 				tabindex="-1"
 				class="absolute"
-				style="z-index: 40; transform: translate(0px, -{direction_up ? 0 : value_list.length * 32 +
+				style="z-index: 40; transform: translate(1px, -{direction_up ? 0 : value_list.length * 32 +
 					40}px); will-change: transform;"
 			>
 				<span data-focus-scope-start="true"></span>

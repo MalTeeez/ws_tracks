@@ -47,8 +47,8 @@ export function parse_track_buffer(buffer: ArrayBuffer): Array<Plane> {
     const lat = dataView.getInt32(11) / 100000;
 
     //const p1 = new LatLon(lon, lat)
-
-    tracks.push(new Plane(id, lon * 150, lat * 15.75))
+	// lon * XXX, 	lat * 14.5
+    tracks.push(new Plane(id, lon * 110, lat * 8.5))
   }
 
   return tracks;
