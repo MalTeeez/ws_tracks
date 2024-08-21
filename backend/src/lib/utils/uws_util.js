@@ -384,3 +384,13 @@ export function openWsConnection(ws) {
     ws.end(404, "Channel not found.");
   }
 }
+
+/**
+ * Check if a provided Origin from a http options request is allowed
+ * @param {string} origin 
+ * @returns {boolean}
+ */
+export function checkClientOrigin(origin) {
+  const origin_map = new Set(["https://sxmaa.net", "http://sxmaa.net", "http://localhost", "http://localhost:5173"]);
+  return origin_map.has(origin);
+}

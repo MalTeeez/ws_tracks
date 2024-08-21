@@ -1,4 +1,5 @@
 import {
+    checkClientOrigin,
     quickCloseResponse,
 } from '../lib/utils/uws_util.js';
 import { TRACK_SERVER } from '../ws_track.js';
@@ -9,8 +10,16 @@ export default {
          * @type {string}
          */
         let track_id = req.getQuery("id");
+        const origin = req.getHeader("origin")
 
-        if (!track_id || track_id.length != 7) {
+        if (!checkClientOrigin(origin)) {
+            res
+                .writeStatus("400")
+                .writeHeader("Access-Control-Allow-Origin", "https://sxmaa.net")
+                .end()
+        }
+
+        if (!track_id) { // Disabled as long as I still have faulty ids || track_id.length != 7) {
             quickCloseResponse(
                 res,
                 "400",
@@ -28,9 +37,7 @@ export default {
                     'Successfully found track with id "' + track_id + '".'
                 )
                 .writeHeader('content-type', 'application/json')
-                .writeHeader("Access-Control-Allow-Origin", "*")
-                .writeHeader("Access-Control-Allow-Headers", "*")
-                .writeHeader("Access-Control-Expose-Headers", "*")
+                .writeHeader("Access-Control-Allow-Origin", origin)
                 .end(JSON.stringify(track));
         } else {
             quickCloseResponse(res, "404", "Plane or Track not found.");
@@ -38,4 +45,21 @@ export default {
         }
 
     },
+    info_options(res, req) {
+        const origin = req.getHeader("origin")
+        if (checkClientOrigin(origin)) {
+            res
+                .writeStatus("200")
+                .writeHeader("Access-Control-Allow-Origin", origin)
+                .writeHeader("Access-Control-Allow-Methods", "GET, OPTIONS")
+                .writeHeader("Access-Control-Allow-Headers", "*")
+                .end()
+        } else {
+            res
+                .writeStatus("400")
+                .writeHeader("Access-Control-Allow-Origin", "https://sxmaa.net")
+                .end()
+        }
+
+    }
 }

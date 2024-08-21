@@ -50,15 +50,22 @@
 	});
 </script>
 
-<div class="pointer-events-auto relative size-full pt-0.5 pb-1.5 pl-1 pr-2 border rounded-md border-dashed w-full hover:border-solid bg-[#ffffff22] hover:bg-[#ffffff55] interpolate-height">
+<div
+	class="pointer-events-auto relative size-full pt-0.5 pb-1.5 pl-1 pr-2 border rounded-md border-dashed w-full 
+		   hover:border-solid bg-[#ffffff22] hover:bg-[#ffffff55] interpolate-height"
+>
 	<div class="grouptext flex flex-col">
-		<div id="title" class="overflow-hidden mr-4 pb-0.5 ">
+		<div id="title" class="overflow-hidden mr-4 pb-0.5">
 			<h6 class="font-medium font-mono drop-shadow-lg leading-5">{title}</h6>
 		</div>
 		<!-- transition:fade={{ duration: 200 }} -->
 		<div id="data" class="leading-3 whitespace-nowrap flex justify-between">
-			<p class="pl-1 font-bold text-[14px] inline text-slate-50 drop-shadow-md">{$interpolated_value.toFixed(1)}</p>
-			<p class="text-[11px] inline text-slate-200 font-bold drop-shadow-md">{value == 1 ? unit_single : unit_multi}</p>
+			<p class="pl-1 font-bold text-[14px] inline text-slate-50 drop-shadow-md">
+				{$interpolated_value.toFixed(1)}
+			</p>
+			<p class="text-[11px] inline text-slate-200 font-bold drop-shadow-md">
+				{value == 1 ? unit_single : unit_multi}
+			</p>
 		</div>
 		<div class="absolute right-0.5 top-1 drop-shadow-md">
 			<!-- transition:fade={{ duration: 200 }} -->

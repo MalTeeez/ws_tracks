@@ -99,7 +99,7 @@
 				</div>
 			</div> 
 		</div>
-		<Map></Map>
+		<!-- <Map></Map> -->
 	</div>
 </div>
 

@@ -32,9 +32,12 @@ APP.ws("/*", {
 
 // ENDPOINTS
 /// INFO
-APP.post(API_BASE_URL + "info",
+APP.get(API_BASE_URL + "info",
   uWSAsyncHandler((res, req) => middleware_detail.info(res, req))
 );
+APP.options(API_BASE_URL + "info",
+  uWSAsyncHandler((res, req) => middleware_detail.info_options(res, req))
+)
 
 
 // ROOT

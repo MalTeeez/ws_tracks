@@ -4,9 +4,6 @@
 	import { cubicOut } from 'svelte/easing';
 	import TrackInfo from './TrackInfo.svelte';
 
-	let innerWidth = $state(0);
-	let innerHeight = $state(0);
-
 	let {
 		parent_track,
 		parent_x,
@@ -21,6 +18,22 @@
 		selected: boolean;
 	} = $props();
 
+	let innerWidth = $state(0);
+	let innerHeight = $state(0);
+
+	let mainCardElement: HTMLDivElement;
+	let card_height: number = $state(-1);
+	let icon_visibility: string = $state('visible');
+	let is_in_focus: boolean = $state(false);
+
+	let line_length: number = $state(0);
+	let line_angle: number = $state(0);
+	let line_color: string = $state('ffffffff');
+
+	let full_track: Plane = $state(new Plane(parent_track.id, parent_x, parent_y))
+
+
+	// #region Card positioning
 	let dist = { x: 25, y: 200 };
 
 	let x_pos = tweened(parent_x, {
@@ -57,15 +70,7 @@
 		}
 	}
 
-	let mainCardElement: HTMLDivElement;
-	let card_height: number = $state(-1);
-	let icon_visibility: string = $state('visible');
-	let is_in_focus: boolean = $state(false);
-
-	let line_length: number = $state(0);
-	let line_angle: number = $state(0);
-	let line_color: string = $state('ffffffff');
-
+	//#region Line drawing
 	// Calculate line position, angle, length
 	$effect(() => {
 		if (mainCardElement) {
@@ -89,6 +94,7 @@
 		}
 	});
 
+	//#region Card dragging
 	function dragMouseDown() {
 		is_in_focus = true;
 		// Stop binding the function
@@ -110,6 +116,33 @@
 		document.onmousemove = null;
 		is_in_focus = false;
 	}
+
+	// #region API Request
+	keepUpdatingData();
+
+	async function keepUpdatingData() {
+		while (selected) {
+			new Promise<void>(async (resolve) => {
+				setTimeout(() => resolve(), inter_speed);
+				const response = await getTrackData();
+				const json = await response.json();
+				full_track = new Plane(
+					json.id,
+					json.x_lon,
+					json.x_lat,
+					json.rotation,
+					json.altitude,
+					json.airspeed,
+					json.rate_of_climb,
+				);
+			}).catch((err) =>
+				console.log('Track card update request failed with: ', err),
+			);
+		}
+	}
+	async function getTrackData() {
+		return fetch('http://sxmaa.net:9001/api/info?id=' + parent_track.id);
+	}
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -130,7 +163,7 @@
 	<div class="relative true-middle pointer-events-auto">
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
-			class="interpolate-height overflow-hidden min-w-60 max-w-64 drop-shadow-xl backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90 rounded-lg"
+			class="interpolate-height min-w-60 max-w-64 drop-shadow-xl backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90 rounded-lg"
 			style="height: {card_height}px; max-height: 17.5rem;"
 			role="tooltip"
 			bind:this={mainCardElement}
@@ -193,55 +226,54 @@
 						{/if}
 					</div>
 				</div>
-				<div>
-					<!-- px-2 pb-2 pt-1 -->
-					<div
+				<div
 					id="info-container"
-						class="px-1 pb-1 pt-1 gap-x-1 gap-y-1.5 backdrop-brightness-[0.75] backdrop-blur-xl select-none grid grid-cols-2 overflow-hidden"
-					>
-						<TrackInfo
-							title="Latitude"
-							unit_multi="minutes"
-							unit_single="minute"
-							value={parent_x}
-							inter_speed={inter_speed}
-						></TrackInfo>
-						<TrackInfo
-							title="Longitude"
-							unit_multi="minutes"
-							unit_single="minute"
-							value={parent_y}
-							inter_speed={inter_speed}
-						></TrackInfo>
-						<TrackInfo
-							title="Airspeed"
-							unit_multi="knots"
-							unit_single="knot"
-							value={322}
-							inter_speed={inter_speed}
-						></TrackInfo>
-						<TrackInfo
-							title="Airspeed"
-							unit_multi="knots"
-							unit_single="knot"
-							value={322}
-							inter_speed={inter_speed}
-						></TrackInfo>
-						<TrackInfo
-							title="Airspeed"
-							unit_multi="knots"
-							unit_single="knot"
-							value={322}
-							inter_speed={inter_speed}
-						></TrackInfo>
-						<TrackInfo
-							title="Airspeed"
-							unit_multi="knots"
-							unit_single="knot"
-							value={322}
-							inter_speed={inter_speed}
-						></TrackInfo>
-					</div>
+					class="px-1 pb-1 pt-1 gap-x-1 gap-y-1.5 min-w-0 backdrop-brightness-[0.75] backdrop-blur-xl select-none grid grid-cols-2 overflow-hidden"
+				>
+				{#if full_track}
+					<TrackInfo
+						title="Latitude"
+						unit_multi="minutes"
+						unit_single="minute"
+						value={full_track.x_lon}
+						{inter_speed}
+					></TrackInfo>
+					<TrackInfo
+						title="Longitude"
+						unit_multi="minutes"
+						unit_single="minute"
+						value={full_track.y_lat}
+						{inter_speed}
+					></TrackInfo>
+					<TrackInfo
+						title="Airspeed"
+						unit_multi="knots"
+						unit_single="knot"
+						value={full_track.get_safe_spd()}
+						{inter_speed}
+					></TrackInfo>
+					<TrackInfo
+						title="Heading"
+						unit_multi="degrees"
+						unit_single="degree"
+						value={full_track.get_safe_rot()}
+						{inter_speed}
+					></TrackInfo>
+					<TrackInfo
+						title="Altitude"
+						unit_multi="feet"
+						unit_single="foot"
+						value={full_track.get_safe_alt()}
+						{inter_speed}
+					></TrackInfo>
+					<TrackInfo
+						title="Climb Rate"
+						unit_multi="feet per min"
+						unit_single="feet per min"
+						value={full_track.get_safe_roc()}
+						{inter_speed}
+					></TrackInfo>
+					{/if}
 				</div>
 			</div>
 		</div>

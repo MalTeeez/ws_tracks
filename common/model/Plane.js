@@ -74,6 +74,38 @@ export default class Plane {
     if (!this.x_lon) return 0;
     return this.x_lon * 100000;
   }
+
+  /**
+   * Get a null-safe version of the rotation attribute
+   * @returns {number}
+   */
+  get_safe_rot() {
+    return this.rotation ? this.rotation : 0;
+  }
+
+  /**
+   * Get a null-safe version of the altitude attribute
+   * @returns {number}
+   */
+  get_safe_alt() {
+    return this.altitude ? this.altitude : 0;
+  }
+
+  /**
+   * Get a null-safe version of the airspeed attribute
+   * @returns {number}
+   */
+  get_safe_spd() {
+    return this.airspeed ? this.airspeed : 0;
+  }
+
+  /**
+   * Get a null-safe version of the rate of climb attribute
+   * @returns {number}
+   */
+  get_safe_roc() {
+    return this.rate_of_climb ? this.rate_of_climb : 0;
+  }
 }
 
 /**
