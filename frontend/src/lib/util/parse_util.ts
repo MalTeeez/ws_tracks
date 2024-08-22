@@ -36,12 +36,12 @@ export function buffer_to_packets(buffer: ArrayBuffer): Array<UpdatePacket> {
 	let update_packet_array: Array<UpdatePacket> = new Array();
 	if (buffer.byteLength % UpdatePacket.SIZE == 0) {
 		const update_count = buffer.byteLength / UpdatePacket.SIZE;
-		for (let i = 0; i < update_count; i += UpdatePacket.SIZE) {
-			const packet = UpdatePacket.deserialize(buffer.slice(i, UpdatePacket.SIZE));
+		for (let i = 0; i < update_count; i++) {
+			const packet = UpdatePacket.fromBuffer(buffer.slice(i*UpdatePacket.SIZE, i*UpdatePacket.SIZE + UpdatePacket.SIZE));
 			if (packet) {
-				update_packet_array.push()
+				update_packet_array.push(packet)
 			} else {
-				console.warn("Received faulty track update with data: ", buffer.slice(i, UpdatePacket.SIZE))
+				console.warn("Received faulty track update with data: ", buffer.slice(i*UpdatePacket.SIZE, i*UpdatePacket.SIZE + UpdatePacket.SIZE))
 			}
 		}
 	}

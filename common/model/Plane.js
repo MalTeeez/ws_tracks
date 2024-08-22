@@ -1,10 +1,8 @@
 // @ts-check
 
+import { round_to_x_decimals } from "../lib/general_util.js";
+
 /*
- * Needed bits for size
- * Example track msg: CFG791X,9.81639,51.87444;
- * Needed bytes:        7      4        4         (15 bytes)
- * Type:              UInt8   Int32    Int32
  *
  *
  * Id format: AABXXXX (7)
@@ -56,7 +54,7 @@ export default class Plane {
     this.y_lat = y_lat;
 
     if (rotation != undefined) this.rotation = rotation;
-    if (altitude != undefined) this.altitude = altitude;
+    if (altitude != undefined) this.altitude = round_to_x_decimals(altitude, 0);
     if (airspeed != undefined) this.airspeed = airspeed;
     if (rate_of_climb != undefined) this.rate_of_climb = rate_of_climb;
   }

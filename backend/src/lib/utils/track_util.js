@@ -158,7 +158,7 @@ export function tracks_to_packets(tracks) {
   let update_packets = new Array();
 
   for (const track of tracks.values()) {
-    update_packets.push(UpdatePacket.fromPlane(track))
+    update_packets.push(UpdatePacket.fromTrack(track))
   }
 
   return update_packets;
