@@ -18,3 +18,8 @@ UI to display plane tracks from a time-independent datasource
 - [x] get page tree layout working without absolute
 - [ ] design track popup window, and fill with http req
 - [ ] create a packet framework, to allow different binary packets
+
+## links:
+- Svelte 5 docs: https://svelte-5-preview.vercel.app/docs/introduction
+- Easing functions: https://easings.net
+- Javascript Docs: https://javascript.info

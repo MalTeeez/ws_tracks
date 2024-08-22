@@ -18,6 +18,10 @@ export class WebSocketTrackServer {
    * @type {Map<string, Plane>}
    */
   #planes;
+  /**
+   * @type {Map<string, number>}
+   */
+  #track_update_times;
 
   /**
    * @type {Array<WebSocketChannel>}
@@ -37,6 +41,7 @@ export class WebSocketTrackServer {
     this.TICK_RATE = tick_rate;
     this.active = false;
     this.#planes = new Map();
+    this.#track_update_times = new Map();
     this.ws_track_channels = []
   }
 
@@ -62,7 +67,7 @@ export class WebSocketTrackServer {
           // TODO: Add track deletion messages to clients (see update_tracks_prometheus ending)
 
           // Get new changes
-          let uni_track_updates = await update_tracks_prometheus(this.#planes);
+          let uni_track_updates = await update_tracks_prometheus(this.#planes, this.#track_update_times);
 
           // Append new track updates to all channels
           for (const channel of this.ws_track_channels) {
@@ -110,9 +115,9 @@ export class WebSocketTrackServer {
   /**
    * Get a plane from the current track store
    * @param {string} id The 7-char code of the plane to get
-   * @returns {Plane | undefined} The plane object or undefined if it wasnt found 
+   * @returns {[Plane | undefined, number | undefined]} The plane object or undefined if it wasnt found 
    */
   getTrackedPlane(id) {
-    return this.#planes.get(id);
+    return [this.#planes.get(id), this.#track_update_times.get(id)];
   }
 }

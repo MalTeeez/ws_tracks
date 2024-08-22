@@ -28,8 +28,12 @@ export default {
             return;
         }
 
-        const track = TRACK_SERVER.getTrackedPlane(track_id)
-        if (track) {
+        let [track, update_ts] = TRACK_SERVER.getTrackedPlane(track_id)
+
+        if (track && update_ts) {
+            // Append the last update property to the track object we send out
+            let api_track = { last_update: update_ts }
+            Object.assign(api_track, track);
             res
                 .writeStatus("200")
                 .writeHeader(
@@ -38,7 +42,7 @@ export default {
                 )
                 .writeHeader('content-type', 'application/json')
                 .writeHeader("Access-Control-Allow-Origin", origin)
-                .end(JSON.stringify(track));
+                .end(JSON.stringify(api_track));
         } else {
             quickCloseResponse(res, "404", "Plane or Track not found.");
             return;

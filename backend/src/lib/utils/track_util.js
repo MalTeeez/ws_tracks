@@ -34,9 +34,10 @@ export function update_tracks_randomly(track_list, update_amount, max_x, max_y) 
 /**
  * Update tracks with randomly generated ones (+-5 moves)
  * @param {Map<string,Plane>} track_list A reference to a map containing the previous state
+ * @param {Map<string, number>} last_update_list A reference to a map containing the timestamp of all tracks latest update
  * @returns {Promise<Array<string>>} A list of id's from the track_list that were updated
  */
-export async function update_tracks_prometheus(track_list) {
+export async function update_tracks_prometheus(track_list, last_update_list) {
   /**
    * @type {Array<string>}
    */
@@ -49,6 +50,7 @@ export async function update_tracks_prometheus(track_list) {
       if ((plane_is_known && !deep_equal(plane, track_list.get(id))) || !plane_is_known) {
         // Track is known but has an old state OR track is "new"
         track_list.set(id, plane);
+        last_update_list.set(id, Date.now())
         uni_track_updates.push(id);
       }
     }
@@ -57,6 +59,7 @@ export async function update_tracks_prometheus(track_list) {
       for (const id of track_list.keys()) {
         if (!prom_tracks.has(id)) {
           track_list.delete(id);
+          last_update_list.delete(id);
           //console.log("Removed out-of-date track " + id);
         }
       }

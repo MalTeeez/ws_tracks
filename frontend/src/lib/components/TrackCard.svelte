@@ -3,6 +3,7 @@
 	import Plane from '../../../../common/model/Plane';
 	import { cubicOut } from 'svelte/easing';
 	import TrackInfo from './TrackInfo.svelte';
+	import { getJSON } from '$lib/util/fetch_util';
 
 	let {
 		parent_track,
@@ -30,8 +31,9 @@
 	let line_angle: number = $state(0);
 	let line_color: string = $state('ffffffff');
 
-	let full_track: Plane = $state(new Plane(parent_track.id, parent_x, parent_y))
-
+	let full_track: Plane = $state(
+		new Plane(parent_track.id, parent_x, parent_y),
+	);
 
 	// #region Card positioning
 	let dist = { x: 25, y: 200 };
@@ -74,8 +76,8 @@
 	// Calculate line position, angle, length
 	$effect(() => {
 		if (mainCardElement) {
-			card_height = mainCardElement.clientHeight;
-
+			updateCardHeight();
+			
 			const deltaX = parent_x - $x_pos;
 			const deltaY = parent_y - $y_pos;
 
@@ -93,6 +95,10 @@
 			}
 		}
 	});
+
+	function updateCardHeight() {
+		card_height = mainCardElement.clientHeight;
+	}
 
 	//#region Card dragging
 	function dragMouseDown() {
@@ -117,31 +123,46 @@
 		is_in_focus = false;
 	}
 
-	// #region API Request
-	keepUpdatingData();
+// #region API Request
+	// Trigger on inter_speed changes
+	$effect(() => {
+		// Update on:
+		inter_speed;
+		// Dont update on contents of this function
+		setTimeout(() => {
+			keepUpdatingData()
+		});
+	})
 
 	async function keepUpdatingData() {
-		while (selected) {
-			new Promise<void>(async (resolve) => {
+		const start_interval = inter_speed;
+		let last_actual_update = Date.now();
+
+		while (selected && start_interval == inter_speed) {
+			await new Promise<void>(async (resolve) => {
+				// Set a timeout for this promise, so we only run it at the current interval speed
 				setTimeout(() => resolve(), inter_speed);
-				const response = await getTrackData();
-				const json = await response.json();
-				full_track = new Plane(
-					json.id,
-					json.x_lon,
-					json.x_lat,
-					json.rotation,
-					json.altitude,
-					json.airspeed,
-					json.rate_of_climb,
-				);
+
+				// Get json data from the info api endpoint
+				const json = await getJSON('info?id=' + parent_track.id);
+				// And parse that data into our updated track
+				if (json.last_update != last_actual_update) {
+					full_track = new Plane(
+						json.id,
+						json.x_lon,
+						json.y_lat,
+						json.rotation,
+						json.altitude,
+						json.airspeed,
+						json.rate_of_climb,
+					);
+					last_actual_update = json.last_update;
+				}
+
 			}).catch((err) =>
-				console.log('Track card update request failed with: ', err),
+				console.warn('Track card update request failed with: ', err),
 			);
 		}
-	}
-	async function getTrackData() {
-		return fetch('http://sxmaa.net:9001/api/info?id=' + parent_track.id);
 	}
 </script>
 
@@ -163,7 +184,7 @@
 	<div class="relative true-middle pointer-events-auto">
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
-			class="interpolate-height min-w-60 max-w-64 drop-shadow-xl backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90 rounded-lg"
+			class="interpolate-height min-w-60 max-w-64 drop-shadow-xl backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90 rounded-lg overflow-hidden"
 			style="height: {card_height}px; max-height: 17.5rem;"
 			role="tooltip"
 			bind:this={mainCardElement}
@@ -230,49 +251,55 @@
 					id="info-container"
 					class="px-1 pb-1 pt-1 gap-x-1 gap-y-1.5 min-w-0 backdrop-brightness-[0.75] backdrop-blur-xl select-none grid grid-cols-2 overflow-hidden"
 				>
-				{#if full_track}
-					<TrackInfo
-						title="Latitude"
-						unit_multi="minutes"
-						unit_single="minute"
-						value={full_track.x_lon}
-						{inter_speed}
-					></TrackInfo>
-					<TrackInfo
-						title="Longitude"
-						unit_multi="minutes"
-						unit_single="minute"
-						value={full_track.y_lat}
-						{inter_speed}
-					></TrackInfo>
-					<TrackInfo
-						title="Airspeed"
-						unit_multi="knots"
-						unit_single="knot"
-						value={full_track.get_safe_spd()}
-						{inter_speed}
-					></TrackInfo>
-					<TrackInfo
-						title="Heading"
-						unit_multi="degrees"
-						unit_single="degree"
-						value={full_track.get_safe_rot()}
-						{inter_speed}
-					></TrackInfo>
-					<TrackInfo
-						title="Altitude"
-						unit_multi="feet"
-						unit_single="foot"
-						value={full_track.get_safe_alt()}
-						{inter_speed}
-					></TrackInfo>
-					<TrackInfo
-						title="Climb Rate"
-						unit_multi="feet per min"
-						unit_single="feet per min"
-						value={full_track.get_safe_roc()}
-						{inter_speed}
-					></TrackInfo>
+					{#if full_track}
+						<TrackInfo
+							title="Latitude"
+							unit_multi="minutes"
+							unit_single="minute"
+							value={full_track.x_lon}
+							{inter_speed}
+							decimals={3}
+						></TrackInfo>
+						<TrackInfo
+							title="Longitude"
+							unit_multi="minutes"
+							unit_single="minute"
+							value={full_track.y_lat}
+							{inter_speed}
+							decimals={3}
+						></TrackInfo>
+						<TrackInfo
+							title="Airspeed"
+							unit_multi="knots"
+							unit_single="knot"
+							value={full_track.get_safe_spd()}
+							{inter_speed}
+							decimals={1}
+						></TrackInfo>
+						<TrackInfo
+							title="Heading"
+							unit_multi="degrees"
+							unit_single="degree"
+							value={full_track.get_safe_rot()}
+							{inter_speed}
+							decimals={1}
+						></TrackInfo>
+						<TrackInfo
+							title="Altitude"
+							unit_multi="feet"
+							unit_single="foot"
+							value={full_track.get_safe_alt()}
+							{inter_speed}
+							decimals={0}
+						></TrackInfo>
+						<TrackInfo
+							title="Climb Rate"
+							unit_multi="feet/min"
+							unit_single="feet/min"
+							value={full_track.get_safe_roc()}
+							{inter_speed}
+							decimals={1}
+						></TrackInfo>
 					{/if}
 				</div>
 			</div>

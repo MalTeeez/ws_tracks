@@ -1,6 +1,6 @@
 // @ts-check
 
-/**
+/*
  * Needed bits for size
  * Example track msg: CFG791X,9.81639,51.87444;
  * Needed bytes:        7      4        4         (15 bytes)
@@ -16,6 +16,10 @@
  * Which is 32bits (signed for negative values)
  */
 
+/**
+ * The Plane object, simple with: ``id, lat, long`` 
+ * or detailed with: ``id, lat, lon, rot, alt, roc, spd``
+ */
 export default class Plane {
   id;
   x_lon;
@@ -51,10 +55,10 @@ export default class Plane {
     this.x_lon = x_lon;
     this.y_lat = y_lat;
 
-    if (rotation) this.rotation = rotation;
-    if (altitude) this.altitude = altitude;
-    if (airspeed) this.airspeed = airspeed;
-    if (rate_of_climb) this.rate_of_climb = rate_of_climb;
+    if (rotation != undefined) this.rotation = rotation;
+    if (altitude != undefined) this.altitude = altitude;
+    if (airspeed != undefined) this.airspeed = airspeed;
+    if (rate_of_climb != undefined) this.rate_of_climb = rate_of_climb;
   }
 
   /**
