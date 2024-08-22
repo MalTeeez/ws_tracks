@@ -6,7 +6,7 @@
 	import { changeChannel } from '$lib/util/ws_util';
 	import TimeSelector from '$lib/components/TimeSelector.svelte';
 	import { getInterval } from '../../../common/lib/time_util.js';
-	import Map from '$lib/components/Map.svelte';
+	// import Map from '$lib/components/Map.svelte';
 	import BarAnimation from '$lib/components/BarAnimation.svelte';
 
 	let bool: boolean = false;
@@ -108,8 +108,6 @@
 					<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 bottom-0 left-0"></div> -->
 
 <style>
-	@tailwind base;
-
 	code {
 		background: theme('colors.zinc.900');
 		padding: theme('spacing[0.5]');

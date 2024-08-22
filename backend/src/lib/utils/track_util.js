@@ -2,6 +2,8 @@
 import Plane from "../../../../common/model/Plane.js";
 import { queryInstant } from "./prom_util.js";
 import { utf16_to_utf8, deep_equal, generateRandomString, random_int, utf8_to_utf16, random_float } from "../../../../common/lib/general_util.js";
+import UpdatePacket from "../../../../common/model/packet/UpdatePacket.js";
+
 
 /**
  * Update tracks with randomly generated ones (+-5 moves)
@@ -30,6 +32,7 @@ export function update_tracks_randomly(track_list, update_amount, max_x, max_y) 
   }
   return uni_track_updates;
 }
+
 
 /**
  * Update tracks with randomly generated ones (+-5 moves)
@@ -69,6 +72,7 @@ export async function update_tracks_prometheus(track_list, last_update_list) {
   return uni_track_updates;
 }
 
+
 /**
  * Generate a set number of fake plane tracks and fill a provided map with them
  * @param {Map<string, Plane>} planes Your provided map
@@ -83,6 +87,7 @@ export function generateInitial(planes, max_tracks, max_x, max_y) {
   }
 }
 
+
 /**
  * Convert a plane to a ws update message
  * @param {Plane} plane Your Plane
@@ -92,23 +97,73 @@ export function plane_to_message(plane) {
   return `${plane.id},${plane.x_lon},${plane.y_lat};`;
 }
 
+
 /**
  * Convert a list of track updates to an ArrayBuffer of tracks
  * This function is a wrapper for tracks_to_buffer()
- * @param {Set<string>} track_updates Your track updates array filled with ids
+ * @param {IterableIterator<string>} track_updates Your track updates array filled with ids
  * @param {Map<string,Plane>} plane_list A reference to a map containing the previous state
  * @returns {ArrayBuffer} Your ArrayBuffer filled with tracks
  */
 export function track_updates_to_buffer(track_updates, plane_list) {
   const updated_planes = new Map();
-  track_updates.forEach((id) => {
+
+  // Create map from id list and reference state track map
+  for (const id of track_updates) {
     const plane = plane_list.get(id);
     if (plane) {
       updated_planes.set(id, plane)
     }
-  });
-  return tracks_to_buffer(updated_planes);
+  }
+  
+  let uint8_list = new Array(updated_planes.size * UpdatePacket.SIZE);
+  let offset = 0;
+  for (const packet of tracks_to_packets(updated_planes)) {
+    const packet_uint8_arr = new Uint8Array(packet.serialize())
+    for (let i = 0; i < UpdatePacket.SIZE; i++) {
+      uint8_list[offset + i] = packet_uint8_arr[i];
+    }
+    offset += UpdatePacket.SIZE;
+  }
+  
+  const buffer = new Uint8Array(uint8_list).buffer;
+
+  return buffer;
 }
+
+/**
+ * Convert a list of update packets to a Map of tracks
+ * @param {Array<UpdatePacket>} update_packets Your Array filled with track packets
+ * @returns {Map<string, Plane>} Your track Map filled with planes
+ */
+export function packets_to_tracks(update_packets) {
+  let tracks = new Map();
+
+  for (const packet of update_packets) {
+    let track = packet.toPlane();
+    tracks.set(track.id, track);
+  }
+
+  return tracks;
+}
+
+
+
+/**
+ * Convert a Map of tracks to a list of UpdatePackets
+ * @param {Map<string, Plane>} tracks Your track Map filled with planes
+ * @returns {Array<UpdatePacket>} Your Array filled with track update packets
+ */
+export function tracks_to_packets(tracks) {
+  let update_packets = new Array();
+
+  for (const track of tracks.values()) {
+    update_packets.push(UpdatePacket.fromPlane(track))
+  }
+
+  return update_packets;
+}
+
 
 /**
  * Convert a Map of tracks to an ArrayBuffer of tracks

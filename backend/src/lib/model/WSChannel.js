@@ -75,7 +75,7 @@ export class WebSocketChannel {
       /**
        * @type {ArrayBuffer}
        */
-      const message = track_updates_to_buffer(this.track_updates, this.plane_state_tracker)
+      const message = track_updates_to_buffer(this.track_updates.keys(), this.plane_state_tracker)
       //console.log("Sending out " + this.track_updates.size + " tracks on channel " + this.ws_channel_id)
       // And send it out to listeners (only if it has entries)
       if (this.track_updates.size > 0) {

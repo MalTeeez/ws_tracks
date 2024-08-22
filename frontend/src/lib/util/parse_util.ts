@@ -1,6 +1,5 @@
 import Plane from '../../../../common/model/Plane.js';
-import { utf8_to_utf16 } from '../../../../common/lib/general_util.js'
-import LatLon from 'geodesy/latlon-spherical.js';
+import UpdatePacket from '../../../../common/model/packet/UpdatePacket.js'
 
 
 export function parse_track_string(track_msg: string): Array<Plane> {
@@ -29,27 +28,50 @@ export function parse_track_string(track_msg: string): Array<Plane> {
 	return tracks;
 }
 
-// Similar function at backend/src/lib/track_util.js buffer_to_tracks()
 /**
- * Convert an ArrayBuffer of tracks to a Map of tracks
- * @param {ArrayBuffer} buffer Your ArrayBuffer filled with tracks
+ * @param {ArrayBuffer} buffer
+ * @returns {Array<UpdatePacket>}
+ */
+export function buffer_to_packets(buffer: ArrayBuffer): Array<UpdatePacket> {
+	let update_packet_array: Array<UpdatePacket> = new Array();
+	if (buffer.byteLength % UpdatePacket.SIZE == 0) {
+		const update_count = buffer.byteLength / UpdatePacket.SIZE;
+		for (let i = 0; i < update_count; i += UpdatePacket.SIZE) {
+			const packet = UpdatePacket.deserialize(buffer.slice(i, UpdatePacket.SIZE));
+			if (packet) {
+				update_packet_array.push()
+			} else {
+				console.warn("Received faulty track update with data: ", buffer.slice(i, UpdatePacket.SIZE))
+			}
+		}
+	}
+	return update_packet_array;
+}
+
+
+// Similar function at backend/src/lib/track_util.js packets_to_tracks()
+/**
+ * Convert a list of update packets to a Map of tracks
+ * @param {Array<UpdatePacket>} update_packets Your Array filled with track packets
  * @returns {Array<Plane>} Your track Map filled with planes
  */
-export function parse_track_buffer(buffer: ArrayBuffer): Array<Plane> {
-  let tracks = new Array<Plane>;
+export function packets_to_tracks(update_packets: Array<UpdatePacket>): Array<Plane> {
+  let tracks: Array<Plane> = [];
 
-  for (let i = 0; i < buffer.byteLength / 15; i += 15) {
-    //                      n-th entry * sizeof entry
-    let dataView = new DataView(buffer, i * 15, 15);
-
-    const id = utf8_to_utf16(new Uint8Array(buffer, i, 7));
-    const lon = dataView.getInt32(7) / 100000;
-    const lat = dataView.getInt32(11) / 100000;
-
-    //const p1 = new LatLon(lon, lat)
-	// lon * XXX, 	lat * 14.5
-    tracks.push(new Plane(id, lon * 110, lat * 8.5))
+  for (const packet of update_packets) {
+    let track = packet.toPlane();
+    tracks.push(track)
   }
 
+  console.log("Parsed " + tracks.length + " tracks with data: ", tracks)
   return tracks;
+}
+
+/**
+ * Wrapper for packets_to_tracks and buffer_to_packets
+ * @param {ArrayBuffer} buffer
+ * @returns {Array<Plane>}
+ */
+export function buffer_to_tracks(buffer: ArrayBuffer): Array<Plane> {
+	return packets_to_tracks(buffer_to_packets(buffer))
 }

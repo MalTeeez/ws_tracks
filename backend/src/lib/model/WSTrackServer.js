@@ -2,7 +2,7 @@
 import Plane from "../../../../common/model/Plane.js";
 import { WebSocketChannel } from "./WSChannel.js";
 import { Interval } from '../../../../common/lib/time_util.js'
-import { tracks_to_buffer, update_tracks_prometheus } from "../utils/track_util.js";
+import { track_updates_to_buffer, tracks_to_buffer, update_tracks_prometheus } from "../utils/track_util.js";
 
 /**
  * @class
@@ -66,7 +66,7 @@ export class WebSocketTrackServer {
         new Promise(async (resolve) => {
           // TODO: Add track deletion messages to clients (see update_tracks_prometheus ending)
 
-          // Get new changes
+          // Get new changes from our datasource
           let uni_track_updates = await update_tracks_prometheus(this.#planes, this.#track_update_times);
 
           // Append new track updates to all channels
@@ -109,7 +109,7 @@ export class WebSocketTrackServer {
    * @returns {ArrayBuffer}
    */
   collectState() {
-    return tracks_to_buffer(this.#planes);
+    return track_updates_to_buffer(this.#planes.keys(), this.#planes);
   }
 
   /**

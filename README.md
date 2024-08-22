@@ -16,10 +16,11 @@ UI to display plane tracks from a time-independent datasource
 - [x] transmit updates in binary
 - [ ] keep track moving on longer than update rate wait times with expected speed
 - [x] get page tree layout working without absolute
-- [ ] design track popup window, and fill with http req
+- [x] design track popup window, and fill with http req
 - [ ] create a packet framework, to allow different binary packets
 
 ## links:
 - Svelte 5 docs: https://svelte-5-preview.vercel.app/docs/introduction
 - Easing functions: https://easings.net
 - Javascript Docs: https://javascript.info
+- Icons: https://friconix.com/

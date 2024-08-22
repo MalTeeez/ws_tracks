@@ -77,7 +77,7 @@
 	$effect(() => {
 		if (mainCardElement) {
 			updateCardHeight();
-			
+
 			const deltaX = parent_x - $x_pos;
 			const deltaY = parent_y - $y_pos;
 
@@ -123,16 +123,16 @@
 		is_in_focus = false;
 	}
 
-// #region API Request
+	// #region API Request
 	// Trigger on inter_speed changes
 	$effect(() => {
 		// Update on:
 		inter_speed;
 		// Dont update on contents of this function
 		setTimeout(() => {
-			keepUpdatingData()
+			keepUpdatingData();
 		});
-	})
+	});
 
 	async function keepUpdatingData() {
 		const start_interval = inter_speed;
@@ -158,7 +158,6 @@
 					);
 					last_actual_update = json.last_update;
 				}
-
 			}).catch((err) =>
 				console.warn('Track card update request failed with: ', err),
 			);
@@ -223,6 +222,22 @@
 									d=" M 300 275C 306 275 313 277 318 282C 318 282 500 465 500 465C 500 465 682 282 682 282C 687 278 693 275 700 275C 710 274 719 281 723 290C 727 299 725 310 718 318C 718 318 535 500 535 500C 535 500 718 682 718 682C 724 689 727 698 724 707C 722 715 715 722 707 724C 698 727 689 724 682 718C 682 718 500 535 500 535C 500 535 318 718 318 718C 311 724 302 727 293 724C 285 722 278 715 276 707C 273 698 276 689 282 682C 282 682 465 500 465 500C 465 500 282 318 282 318C 275 311 273 300 277 290C 280 281 290 275 300 275C 300 275 300 275 300 275"
 								/></svg
 							>
+						</button>
+						
+						<button class="" onclick={() => window.open('https://grafana.sxmaa.net/d/ac48e9d2-666d-4681-95d9-54ae9e7739b3/flight-track-testboard?orgId=1&refresh=5s&var-flight=' + parent_track.id)}>
+							<svg
+								class="fill-slate-50 cursor-pointer pointer-events-auto"
+								width="20"
+								height="20"
+								viewBox="0 0 1000 1000"
+								visibility={icon_visibility}
+								xmlns="http://www.w3.org/2000/svg"
+								><path
+									d=" M 800 113C 862 113 912 163 912 225C 912 234 911 243 909 251C 909 251 1000 309 1000 309C 1000 309 1000 399 1000 399C 1000 399 869 314 869 314C 850 329 826 337 800 337C 791 337 783 337 775 335C 775 335 588 631 588 631C 603 650 613 674 613 700C 613 762 562 812 500 812C 438 812 387 762 387 700C 387 693 388 686 390 679C 390 679 273 611 273 611C 253 627 228 638 200 638C 180 638 161 632 144 622C 144 622 0 746 0 746C 0 746 0 647 0 647C 0 647 95 566 95 566C 90 553 88 539 88 525C 88 463 138 412 200 412C 262 412 312 463 312 525C 312 532 312 539 310 546C 310 546 427 614 427 614C 447 598 472 588 500 588C 509 588 517 588 525 590C 525 590 712 294 712 294C 697 275 688 251 688 225C 688 163 738 113 800 113C 800 113 800 113 800 113"
+									transform="rotate(180,500,500)"
+								/></svg
+							>
+						
 						</button>
 						{#if has_been_dragged}
 							<button

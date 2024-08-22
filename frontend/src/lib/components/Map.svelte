@@ -9,7 +9,14 @@
 		RETINATILES_API_KEY,
 	} from '../../.config.json';
 	import ListSelector from './ListSelector.svelte';
-	import type { Map as LeafletMap, MapOptions, LeafletEvent} from 'leaflet';
+	import {
+		type Map as LeafletMap,
+		type MapOptions,
+		type LeafletEvent,
+		LatLng,
+	} from 'leaflet';
+	import type Plane from '../../../../common/model/Plane';
+	import { feetToMeter } from '../../../../common/lib/general_util';
 
 	let map_div: HTMLDivElement;
 	let is_mounted: boolean = $state(false);
@@ -99,8 +106,7 @@
 					zoomOffset: -1,
 					minZoom: 1,
 					maxZoom: 21,
-					attribution:
-						`\u0026copy; ${map_source.attribution} \u003ca href="https://www.openstreetmap.org/copyright" target="_blank"\u003e\u0026copy; OpenStreetMap\u003c/a\u003e`,
+					attribution: `\u0026copy; ${map_source.attribution} \u003ca href="https://www.openstreetmap.org/copyright" target="_blank"\u003e\u0026copy; OpenStreetMap\u003c/a\u003e`,
 					crossOrigin: true,
 					updateWhenIdle: true,
 				})
@@ -111,6 +117,22 @@
 	onMount(() => {
 		is_mounted = true;
 	});
+
+	// export function isInBounds(plane: Plane): boolean {
+	// 	if (map_obj) {
+	// 		return map_obj
+	// 			.getBounds()
+	// 			.contains(
+	// 				new LatLng(
+	// 					plane.y_lat,
+	// 					plane.x_lon,
+	// 					feetToMeter(plane.get_safe_alt()),
+	// 				),
+	// 			);
+	// 	} else {
+	// 		return true;
+	// 	}
+	// }
 </script>
 
 <!-- <div class="relative h-[1600px] w-[1600px] overflow-hidden"> -->

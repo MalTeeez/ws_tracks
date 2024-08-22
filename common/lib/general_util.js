@@ -104,6 +104,23 @@ export function generateRandomString(length) {
   return string;
 }
 
+/**
+ * Convert a distance in feet (usually height) to meters
+ * @param {number} feet Distance in feet
+ * @returns {number}
+ */
+export function feetToMeter(feet) {
+  return feet / 3.28084;
+}
+
+/**
+ * Convert a distance in meters to feet (usually height)
+ * @param {number} meter Distance in meters
+ * @returns 
+ */
+export function meterToFeet(meter) {
+  return meter * 3.28084;
+}
 
 /* FROM https://developers.google.com/maps/documentation/tile/2d-tiles-overview
 var TILE_SIZE = 256;

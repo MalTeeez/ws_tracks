@@ -1,7 +1,7 @@
 import { tracks, track_update_count } from '$lib/stores/tracks';
 import { WebSocket } from 'partysocket';
 import Plane from '../../../../common/model/Plane';
-import { parse_track_buffer } from './parse_util';
+import { buffer_to_tracks } from './parse_util';
 
 let ws: WebSocket;
 let base_url: string = 'sxmaa.net:9001/tracks';
@@ -18,7 +18,9 @@ export function changeChannel(channel: number) {
 		ws.close();
 	}
 	initWS(base_url, String(channel));
-	track_update_count.update(() => {return 0})
+	track_update_count.update(() => {
+		return 0;
+	});
 	if (ws) {
 		ws.reconnect();
 	}
@@ -46,30 +48,29 @@ function add_listeners(ws: WebSocket) {
 }
 
 function handle_track_update(event: MessageEvent) {
-	if (event.data.byteLength % 15 != 0) {
-		console.warn("Received faulty track update with data: ", event.data)
-	} else {
-		const track_updates: Plane[] = parse_track_buffer(event.data);
-		
-		track_update_count.update((count) => {count += track_updates.length; return count })
-		tracks.update((tracks) => {
-			for (const track of track_updates) {
-				if (tracks.has(track.id)) {
-					// Plane already exists, but we have to replace it to update the svelte reactions
-					let old_plane: Plane | undefined = tracks.get(track.id);
-					if (old_plane) {
-						old_plane.x_lon = track.x_lon;
-						old_plane.y_lat = track.y_lat;
-					}
-				} else {
-					// Plane is new, so we can take the instantiated one
-					tracks.set(track.id, track);
-				}
-			}
+	const track_updates: Plane[] = buffer_to_tracks(event.data);
 
-			return tracks;
-		});
-	}
+	track_update_count.update((count) => {
+		count += track_updates.length;
+		return count;
+	});
+	tracks.update((tracks) => {
+		for (const track of track_updates) {
+			if (tracks.has(track.id)) {
+				// Plane already exists, but we have to replace it to update the svelte reactions
+				let old_plane: Plane | undefined = tracks.get(track.id);
+				if (old_plane) {
+					old_plane.x_lon = track.x_lon;
+					old_plane.y_lat = track.y_lat;
+				}
+			} else {
+				// Plane is new, so we can take the instantiated one
+				tracks.set(track.id, track);
+			}
+		}
+
+		return tracks;
+	});
 }
 
 export function get_ws_state(ws: WebSocket): string {
