@@ -63,7 +63,6 @@ export function packets_to_tracks(update_packets: Array<UpdatePacket>): Array<Pl
     tracks.push(track)
   }
 
-  console.log("Parsed " + tracks.length + " tracks with data: ", tracks)
   return tracks;
 }
 

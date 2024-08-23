@@ -1,13 +1,13 @@
 <script lang="ts">
+	import BarAnimation from '$lib/components/BarAnimation.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import Map from '$lib/components/Map.svelte';
 	import PlaneContainer from '$lib/components/PlaneContainer.svelte';
-	import { tracks, track_update_count } from '$lib/stores/tracks';
+	import TimeSelector from '$lib/components/TimeSelector.svelte';
+	import { tracks, track_update_count, rendered_plane_count } from '$lib/stores/stores.js';
 	import { browser } from '$app/environment';
 	import { changeChannel } from '$lib/util/ws_util';
-	import TimeSelector from '$lib/components/TimeSelector.svelte';
 	import { getInterval } from '../../../common/lib/time_util.js';
-	// import Map from '$lib/components/Map.svelte';
-	import BarAnimation from '$lib/components/BarAnimation.svelte';
 
 	let bool: boolean = false;
 	export let interval: number = 500;
@@ -59,12 +59,12 @@
 				<div class="relative shadow-xl overflow-hidden rounded-lg">
 					<Card title="Websocket Connection">
 						<p class="select-none">
-							We are currently tracking <code class="text-sky-300"
+							We are currently tracking <code class="text-slate-950 font-black font-mono"
 								>{$tracks.size}</code
-							> planes.
+							> {$tracks.size == 1 ? "plane" : "planes"} and are rendering <code class="text-slate-950 font-black font-mono">{$rendered_plane_count}</code>.
 						</p>
 						<p class="select-none">
-							And have received <code class="text-pink-500"
+							And have received <code class="text-slate-800 font-black"
 								>{$track_update_count}</code
 							>
 							track updates on the current tracks/{interval}
@@ -99,7 +99,7 @@
 				</div>
 			</div> 
 		</div>
-		<!-- <Map></Map> -->
+		<Map></Map>
 	</div>
 </div>
 
@@ -109,8 +109,10 @@
 
 <style>
 	code {
-		background: theme('colors.zinc.900');
-		padding: theme('spacing[0.5]');
+		background: theme('colors.slate.100');
+		padding-left: 0.25rem;
+		padding-right: 0.25rem;
+		border-radius: 0.375rem;
 	}
 
 	.clicks {

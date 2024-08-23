@@ -8,3 +8,4 @@ export const tracks: Writable<Map<string, Plane>> = writable(
 export const track_update_count: Writable<number> = writable(0);
 
 
+export const rendered_plane_count: Writable<number> = writable(0);

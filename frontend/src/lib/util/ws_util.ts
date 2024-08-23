@@ -1,4 +1,4 @@
-import { tracks, track_update_count } from '$lib/stores/tracks';
+import { tracks, track_update_count } from '$lib/stores/stores';
 import { WebSocket } from 'partysocket';
 import Plane from '../../../../common/model/Plane';
 import { buffer_to_tracks } from './parse_util';
@@ -62,6 +62,7 @@ function handle_track_update(event: MessageEvent) {
 				if (old_plane) {
 					old_plane.x_lon = track.x_lon;
 					old_plane.y_lat = track.y_lat;
+					old_plane.altitude = track.get_safe_alt();
 				}
 			} else {
 				// Plane is new, so we can take the instantiated one

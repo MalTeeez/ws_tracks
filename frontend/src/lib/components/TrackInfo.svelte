@@ -22,7 +22,7 @@
 
 	let prev_val: number = -1;
 	const interpolated_value = tweened(value, {
-		duration: inter_speed,
+		duration: inter_speed * 1.5,
 		easing: circOut,
 	});
 	/**
@@ -61,12 +61,12 @@
 >
 	<div class="grouptext flex flex-col">
 		<div id="title" class="overflow-hidden mr-4 pb-0.5">
-			<p class="font-semibold text-sm text-slate-300 drop-shadow-lg leading-5">
+			<p class="font-semibold text-sm text-slate-200 drop-shadow-lg leading-5">
 				{title}
 			</p>
 		</div>
 		<div id="data" class="leading-3 whitespace-nowrap flex justify-between">
-			<p class="pl-1 font-bold text-[14px] inline text-slate-50 drop-shadow-md">
+			<p class="pl-1 font-bold tabular-nums text-[14px] inline text-slate-50 drop-shadow-lg">
 				{$interpolated_value.toFixed(decimals)}
 			</p>
 			<p class="text-[11px] inline text-slate-200 font-bold drop-shadow-md">
