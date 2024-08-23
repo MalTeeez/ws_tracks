@@ -3,10 +3,11 @@ import type {
     MapOptions,
 	LeafletEvent,
 	LatLng,
-    LatLngBounds
+    LatLngBounds,
+	LatLngExpression,
+	Point,
+	LatLngLiteral
 } from 'leaflet';
-import { feetToMeter } from '../../../../common/lib/general_util';
-import type Plane from '../../../../common/model/Plane';
 import {
 	GOOGLEMAPS_API_KEY,
 	GOOGLEMAPS_SESSION_TOKEN_SATELLITE,
@@ -136,4 +137,29 @@ function updateBounds() {
     if (MAP) {
         map_bounds.set(MAP.getBounds());
     }
+}
+
+export function projectCoords(coords: LatLngLiteral, width: number, height: number): {x: number, y: number} {
+	let point = { x: 0, y: 0 }
+	if (MAP) {
+		const map_point = MAP.project([coords.lat, coords.lng])
+		point.x = map_point.x;
+		point.y = map_point.y;
+
+		console.log("Coords ", coords, " turned into ", map_point)
+	}
+	
+	const bounds = MAP?.getBounds()
+	if (bounds) {
+					//							  minLon				maxLon			    minLon
+		const x = ((coords.lng - bounds.getWest()) / (bounds.getEast() - bounds.getWest()) * width) 
+					//				maxLat							maxLat				  minLon
+		const y = ((bounds.getNorth() - coords.lat) / (bounds.getNorth() - bounds.getSouth()) * height)
+		console.log("Our point would have been x: " + x + " y: " + y)
+
+		point.x = x;
+		point.y = y;
+	}
+
+	return point;
 }

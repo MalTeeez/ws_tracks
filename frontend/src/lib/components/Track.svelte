@@ -4,6 +4,7 @@
 	import TrackCard from './TrackCard.svelte';
 	import { tweened } from 'svelte/motion';
 	import { linear } from 'svelte/easing';
+	import { projectCoords } from '$lib/util/map_util.js';
 
 	let size: number = 0.5;
 	let color = $state('#ff0000');
@@ -12,10 +13,14 @@
 	const {
 		plane,
 		inter_speed,
+		width,
+		height,
 		children,
 	}: {
 		plane: Plane;
 		inter_speed: number;
+		width: number;
+		height: number;
 		children: Snippet;
 	} = $props();
 
@@ -23,19 +28,34 @@
 		color = color === '#ff0000' ? '#0044ff' : '#ff0000';
 	}
 
-	let x_pos = tweened(plane.x_lon, {
+	let x_pos = tweened(undefined, {
 		duration: inter_speed,
 		easing: linear,
 	});
 
-	let y_pos = tweened(plane.y_lat, {
+	let y_pos = tweened(undefined, {
 		duration: inter_speed,
 		easing: linear,
 	});
 
 	$effect(() => {
-		$x_pos = plane.x_lon;
-		$y_pos = plane.y_lat;
+		const coords = projectCoords({
+			lat:	plane.y_lat, 
+			lng:	plane.x_lon,
+			alt: 	plane.get_safe_alt()
+		}, width, height
+	);
+		
+		x_pos.set(coords.x, {
+			duration: inter_speed,
+			easing: linear
+		})
+
+		y_pos.set(coords.y, {
+			duration: inter_speed,
+			easing: linear
+		})
+
 	})
 </script>
 

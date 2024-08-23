@@ -4,6 +4,10 @@
 	import Track from './Track.svelte';
 	import { rendered_plane_count } from '$lib/stores/stores.js';
 	import { map_bounds } from '$lib/util/map_util.js';
+	import { feetToMeter } from '../../../../common/lib/general_util.js';
+
+	let innerWidth = $state(0);
+	let innerHeight = $state(0);
 
 	const {
 		planes,
@@ -28,7 +32,7 @@
 						$map_bounds.contains({
 							lat: track.y_lat,
 							lng: track.x_lon,
-							alt: track.get_safe_alt(),
+							alt: feetToMeter(track.get_safe_alt()),
 						})
 					) {
 						if (planes_on_screen.has(track.id)) {
@@ -55,7 +59,7 @@
 						!$map_bounds.contains({
 							lat: track.y_lat,
 							lng: track.x_lon,
-							alt: track.get_safe_alt(),
+							alt: feetToMeter(track.get_safe_alt()),
 						})
 					) {
 						$planes_on_screen.delete(key);
@@ -69,9 +73,11 @@
 	});
 </script>
 
+<svelte:window bind:innerWidth bind:innerHeight />
+
 <div class="static">
 	{#each $planes_on_screen as [id, plane] (id)}
-		<Track {plane} {inter_speed}>
+		<Track {plane} height={innerHeight} width={innerWidth} {inter_speed}>
 			<p class="select-none">{id}</p>
 		</Track>
 	{/each}
