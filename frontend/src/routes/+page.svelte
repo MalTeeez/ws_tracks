@@ -4,7 +4,11 @@
 	import Map from '$lib/components/Map.svelte';
 	import PlaneContainer from '$lib/components/PlaneContainer.svelte';
 	import TimeSelector from '$lib/components/TimeSelector.svelte';
-	import { tracks, track_update_count, rendered_plane_count } from '$lib/stores/stores.js';
+	import {
+		tracks,
+		track_update_count,
+		rendered_plane_count,
+	} from '$lib/stores/stores.js';
 	import { browser } from '$app/environment';
 	import { changeChannel } from '$lib/util/ws_util';
 	import { getInterval } from '../../../common/lib/time_util.js';
@@ -20,22 +24,22 @@
 
 	let innerWidth = 0;
 	let innerHeight = 0;
-
 </script>
 
-<svelte:window bind:innerWidth bind:innerHeight/>
+<svelte:window bind:innerWidth bind:innerHeight />
+
 
 <div class="top-0 left-0 size-full absolute pointer-events-none overflow-hidden">
 	<div class="relative size-full pointer-events-none">
-		<!--- Place everything under here !--->
-		<!-- START OF DEBUG ELEMENTS --> 
-		<!-- <div class="absolute top-1/4 right-1/4 text-6xl z-50 bg-black select-none">w: {innerWidth} , h: {innerHeight}</div> -->
-		<!-- <div class="absolute top-1/2 w-full h-1 bg-red-700 z-10" draggable="false"></div> -->
-		<!-- <div class="absolute left-1/2 w-1 h-full bg-red-700 z-10" draggable="false"></div> -->
-		<!--  END OF DEBUG ELEMENTS -->	
+	<!--- Place everything under here !--->
+	<!-- START OF DEBUG ELEMENTS -->
+	<!-- <div class="absolute top-1/4 right-1/4 text-6xl z-50 bg-black select-none">w: {innerWidth} , h: {innerHeight}</div> -->
+	<!-- <div class="absolute top-1/2 w-full h-1 bg-red-700 z-10" draggable="false"></div> -->
+	<!-- <div class="absolute left-1/2 w-1 h-full bg-red-700 z-10" draggable="false"></div> -->
+	<!--  END OF DEBUG ELEMENTS -->
 
 
-		<div id="header" class="w-auto absolute z-40 top-2 right-6">
+	<div id="header" class="w-auto absolute z-40 top-2 right-6">
 			<div id="menu-bar">
 				<TimeSelector bind:sel_interval={interval}></TimeSelector>
 			</div>
@@ -56,7 +60,7 @@
 				>
 					Welcome to WS-Track!
 				</p>
-				<div class="relative shadow-xl overflow-hidden rounded-lg">
+				<!-- <div class="relative shadow-xl overflow-hidden rounded-lg">
 					<Card title="Websocket Connection">
 						<p class="select-none">
 							We are currently tracking <code class="text-slate-950 font-black font-mono"
@@ -72,7 +76,7 @@
 						</p>
 						<br />
 						<button
-							class="clicks ring-2 ring-sky-500 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900 pointer-events-auto"
+							class="rounded-xl ring-2 ring-sky-500 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-900 pointer-events-auto"
 							on:click={() => {
 								bool = !bool;
 							}}
@@ -96,16 +100,15 @@
 						<BarAnimation inter_speed={interval * 10}></BarAnimation>
 					</div>
 
-				</div>
+				</div> -->
 			</div> 
 		</div>
 		<Map></Map>
 	</div>
 </div>
 
-
-					<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 top-0 right-0"></div> -->
-					<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 bottom-0 left-0"></div> -->
+<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 top-0 right-0"></div> -->
+<!-- <div class="absolute -z-30 bg-[#1c222b] size-6 bottom-0 left-0"></div> -->
 
 <style>
 	code {
@@ -115,7 +118,4 @@
 		border-radius: 0.375rem;
 	}
 
-	.clicks {
-		border-radius: 0.7rem;
-	}
 </style>

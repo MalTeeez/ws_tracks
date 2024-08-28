@@ -9,3 +9,8 @@ export const track_update_count: Writable<number> = writable(0);
 
 
 export const rendered_plane_count: Writable<number> = writable(0);
+
+/**
+ * is_track_update
+ */ 							
+export const update_state: Writable<boolean> = writable(false);

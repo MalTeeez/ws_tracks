@@ -87,7 +87,7 @@
 			// Dont let the card get dragged away too far from the track
 			if (
 				line_length >
-				Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)) / 5
+				Math.sqrt(Math.pow(innerWidth, 2) + Math.pow(innerHeight, 2)) / 4.5
 			) {
 				closeDragElement();
 				has_been_dragged = false;
@@ -166,12 +166,6 @@
 </script>
 
 <svelte:window bind:innerWidth bind:innerHeight />
-
-<!-- <div
-	id="true-middle-indicator"
-	class="true-middle bg-yellow-400 absolute h-1 w-1 z-50"
-	style="left: {$x_pos}px; top: {$y_pos}px;"
-></div> -->
 
 <div
 	class="absolute pointer-events-none"

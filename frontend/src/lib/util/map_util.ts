@@ -17,6 +17,7 @@ import {
 	RETINATILES_API_KEY,
 } from '../../.config.json';
 import { writable, type Writable } from 'svelte/store';
+import { update_state } from '$lib/stores/stores';
 
 let MAP: LeafletMap | undefined = undefined;
 export let map_bounds: Writable<LatLngBounds>;
@@ -103,6 +104,7 @@ export async function update_map(
 				zoomSnap: 0.25,
 				zoomDelta: 0.25,
 				wheelPxPerZoomLevel: 120,
+				zoomAnimation: true,
 			};
 
 			if (MAP) {
@@ -125,10 +127,10 @@ export async function update_map(
             
             map_bounds = writable(MAP.getBounds())
 
-            MAP.addEventListener('zoom', updateBounds)
+            MAP.addEventListener('zoomstart', updateBounds)
+			MAP.addEventListener('zoomend', updateBounds)
 
-            MAP.addEventListener('dragstart', updateBounds)
-
+			MAP.addEventListener('drag', updateBounds)
 		}
 	}
 }
@@ -136,6 +138,7 @@ export async function update_map(
 function updateBounds() {
     if (MAP) {
         map_bounds.set(MAP.getBounds());
+		update_state.update(() => {return false})
     }
 }
 
@@ -146,7 +149,7 @@ export function projectCoords(coords: LatLngLiteral, width: number, height: numb
 		point.x = map_point.x;
 		point.y = map_point.y;
 
-		console.log("Coords ", coords, " turned into ", map_point)
+		//console.log("Coords ", coords, " turned into ", map_point)
 	}
 	
 	const bounds = MAP?.getBounds()
@@ -155,7 +158,7 @@ export function projectCoords(coords: LatLngLiteral, width: number, height: numb
 		const x = ((coords.lng - bounds.getWest()) / (bounds.getEast() - bounds.getWest()) * width) 
 					//				maxLat							maxLat				  minLon
 		const y = ((bounds.getNorth() - coords.lat) / (bounds.getNorth() - bounds.getSouth()) * height)
-		console.log("Our point would have been x: " + x + " y: " + y)
+		//console.log("Our point would have been x: " + x + " y: " + y)
 
 		point.x = x;
 		point.y = y;

@@ -1,4 +1,4 @@
-import { tracks, track_update_count } from '$lib/stores/stores';
+import { tracks, track_update_count, update_state } from '$lib/stores/stores';
 import { WebSocket } from 'partysocket';
 import Plane from '../../../../common/model/Plane';
 import { buffer_to_tracks } from './parse_util';
@@ -72,6 +72,7 @@ function handle_track_update(event: MessageEvent) {
 
 		return tracks;
 	});
+	update_state.update(() => {return true})
 }
 
 export function get_ws_state(ws: WebSocket): string {
