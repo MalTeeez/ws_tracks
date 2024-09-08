@@ -63,6 +63,7 @@ function handle_track_update(event: MessageEvent) {
 					old_plane.x_lon = track.x_lon;
 					old_plane.y_lat = track.y_lat;
 					old_plane.altitude = track.get_safe_alt();
+					old_plane.rotation = track.get_safe_rot();
 				}
 			} else {
 				// Plane is new, so we can take the instantiated one

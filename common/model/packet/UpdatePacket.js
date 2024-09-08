@@ -6,7 +6,7 @@ import Packet from "./PacketInterface.js";
 /**
  * Needed bits for size
  * Example track msg: CFG791X,9.81639,51.87444;
- * Needed bytes:        7      4        4         (15 bytes)
+ * Needed bytes:        7      4        4         (15 bytes) (out of date, but you get the point)
  * Type:              UInt8   Int32    Int32
  * 
  * */
@@ -21,6 +21,7 @@ export default class UpdatePacket extends Packet {
   /**
    * The track id of the plane this track belongs to.
    * Maximum of 7 characters, all ASCII
+   * 
    * Stored as ``Uint8Array``
    * @byte_size 7
    */
@@ -28,26 +29,37 @@ export default class UpdatePacket extends Packet {
   /**
    * This tracks longitude, multiplied to an int.
    * Maximum 9 digits precision, negative allowed.
+   * 
    * Stored as ``Int32``
-   * @byte_size - 4
+   * @byte_size 4
    */
   x_lon;
   /**
    * This tracks latitude, multiplied to an int.
    * Maximum 9 digits precision, negative allowed.
+   * 
    * Stored as ``Int32``
-   * @byte_size - 4
+   * @byte_size 4
    */
   y_lat;
   /**
    * This tracks altitude.
    * Maximum 9 digits precision, negative forbidden.
+   * 
    * Stored as ``Uint32``
-   * @byte_size - 4
+   * @byte_size 4
    */
   altitude;
+  /**
+   * This track heading / rotation.
+   * Maximum 3 digits precision, negative allowed.
+   * 
+   * Stored as ``Int16``
+   * @byte_size 2
+   */
+  heading;
 
-  static SIZE = 20;
+  static SIZE = 22;
 
   /**
    * Create a new UpdatePacket for a track
@@ -61,12 +73,13 @@ export default class UpdatePacket extends Packet {
    * Maximum 9 digits precision, negative forbidden.
    */
   // @ts-ignore
-  constructor(track_id, x_lon, y_lat, altitude) {
+  constructor(track_id, x_lon, y_lat, altitude, heading) {
     super();
     this.track_id = track_id;
     this.x_lon = x_lon;
     this.y_lat = y_lat;
     this.altitude = round_to_x_decimals(altitude, 0);
+    this.heading = round_to_x_decimals(heading, 0);
   }
 
   /**
@@ -93,8 +106,11 @@ export default class UpdatePacket extends Packet {
         const y_lat = dataView.getInt32(offset);
         offset += 4;
         const altitude = dataView.getUint32(offset);
+        offset += 4;
+        const heading = dataView.getInt16(offset);
+        offset += 2;
 
-        return new UpdatePacket(track_id, x_lon, y_lat, altitude)
+        return new UpdatePacket(track_id, x_lon, y_lat, altitude, heading)
       } else {
         console.log("Packet had wrong id: " + dataView.getUint8(0) + ", we were expecting: " + this.ID)
       }
@@ -114,7 +130,8 @@ export default class UpdatePacket extends Packet {
       plane.id, 
       plane.get_lon_int(), 
       plane.get_lat_int(), 
-      plane.get_safe_alt()
+      plane.get_safe_alt(),
+      plane.get_safe_rot()
     )
   }
 
@@ -129,6 +146,7 @@ export default class UpdatePacket extends Packet {
         this.y_lat / 100000
     );
     plane.altitude = this.altitude;
+    plane.rotation = this.heading;
     return plane;
   }
 
@@ -165,6 +183,8 @@ export default class UpdatePacket extends Packet {
     dataView.setInt32(offset, this.y_lat);
     offset += 4;
     dataView.setUint32(offset, this.altitude);
+    offset += 4;
+    dataView.setInt16(offset, this.heading);
 
     return buffer;
   }

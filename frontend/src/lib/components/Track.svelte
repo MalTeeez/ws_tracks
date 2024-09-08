@@ -29,12 +29,17 @@
 		color = color === '#ff0000' ? '#0044ff' : '#ff0000';
 	}
 
-	let x_pos = tweened(0, {
+	let x_pos = tweened<undefined | number>(undefined, {
 		duration: inter_speed,
 		easing: linear,
 	});
 
-	let y_pos = tweened(0, {
+	let y_pos = tweened<undefined | number>(undefined, {
+		duration: inter_speed,
+		easing: linear,
+	});
+
+	let heading = tweened<undefined | number>(undefined, {
 		duration: inter_speed,
 		easing: linear,
 	});
@@ -62,9 +67,14 @@
 					duration: inter_speed,
 					easing: linear,
 				});
+
+				heading.set(plane.get_safe_rot(), {
+					duration: inter_speed,
+					easing: linear,
+				});
 			});
 		}
-		// Update is map update, so we dont need to interpolate
+		// Update is map update, so we dont need to interpolate, or update heading
 		else {
 			setTimeout(() => {
 				x_pos.set(coords.x, {
@@ -119,7 +129,7 @@
 			<div class="middle-transform">
 				<svg
 					class="fill-red-500 plane"
-					style="transform: rotate({0}deg)"
+					style="transform: rotate({$heading + 270}deg)"
 					width="32"
 					height="32"
 					viewBox="0 0 13 13"
