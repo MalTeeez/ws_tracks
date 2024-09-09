@@ -4,6 +4,7 @@
 	import { cubicOut } from 'svelte/easing';
 	import TrackInfo from './TrackInfo.svelte';
 	import { getJSON } from '$lib/util/fetch_util';
+	import TrackHistory from './TrackHistory.svelte';
 
 	let {
 		parent_track,
@@ -22,6 +23,8 @@
 	let innerWidth = $state(0);
 	let innerHeight = $state(0);
 
+	let history_range = $state(60);
+
 	let mainCardElement: HTMLDivElement;
 	let card_height: number = $state(-1);
 	let icon_visibility: string = $state('visible');
@@ -32,7 +35,7 @@
 	let line_color: string = $state('ffffffff');
 
 	let full_track: Plane = $state(
-		new Plane(parent_track.id, parent_x, parent_y),
+		parent_track,
 	);
 
 	// #region Card positioning
@@ -167,6 +170,8 @@
 
 <svelte:window bind:innerWidth bind:innerHeight />
 
+<TrackHistory current_track={full_track} {history_range} {inter_speed} {selected} {innerHeight} {innerWidth}></TrackHistory>
+
 <div
 	class="absolute pointer-events-none"
 	style="left: {$x_pos.toFixed(2)}px; top: {$y_pos.toFixed(
@@ -175,6 +180,7 @@
 	role="group"
 >
 	<div class="relative true-middle pointer-events-auto">
+		<input type="range" min="1" max="120" bind:value={history_range}>
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
 			class="interpolate-height min-w-60 max-w-64 drop-shadow-xl backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90 rounded-lg overflow-hidden"
@@ -189,7 +195,7 @@
 					<div
 						class="text-sm pl-1 font-sans font-semibold tracking-wide overline select-none"
 					>
-						{parent_track.id}
+						{parent_track.id} {history_range}m
 					</div>
 					<div class="flex flex-row-reverse">
 						<button

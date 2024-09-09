@@ -16,13 +16,11 @@
 		inter_speed,
 		width,
 		height,
-		children,
 	}: {
 		plane: Plane;
 		inter_speed: number;
 		width: number;
 		height: number;
-		children: Snippet;
 	} = $props();
 
 	function changeColor() {
@@ -89,13 +87,34 @@
 			});
 		}
 	});
+
+	
+	function typewriter(node: any, { speed = 1 }) {
+		const valid = node.childNodes.length === 1 && node.childNodes[0].nodeType === Node.TEXT_NODE;
+
+		if (!valid) {
+			throw new Error(`This transition only works on elements with a single text node child`);
+		}
+
+		const text = node.textContent;
+		const duration = text.length / (speed * 0.01);
+
+		return {
+			duration,
+			tick: (t: number) => {
+				const i = Math.trunc(text.length * t);
+				node.textContent = text.slice(0, i);
+			}
+		};
+	}
+
 </script>
 
 {#if selected}
 	<TrackCard
 		parent_track={plane}
-		parent_x={$x_pos}
-		parent_y={$y_pos}
+		parent_x={$x_pos ? $x_pos : 0}
+		parent_y={$y_pos ? $y_pos : 0}
 		{inter_speed}
 		bind:selected
 	></TrackCard>
@@ -129,7 +148,7 @@
 			<div class="middle-transform">
 				<svg
 					class="fill-red-500 plane"
-					style="transform: rotate({$heading + 270}deg)"
+					style="transform: rotate({$heading ? $heading + 270 : 270}deg)"
 					width="32"
 					height="32"
 					viewBox="0 0 13 13"
@@ -144,7 +163,7 @@
 		<div
 			class="antialiased font-bold text-xs text-left text-slate-200 bg-[#22222244] rounded-md px-0.5 leading-4 text drop-shadow-lg"
 		>
-			{@render children()}
+			<p class="select-none" transition:typewriter={{speed: 1.25}}>{plane.id}</p>
 		</div>
 	</div>
 </div>

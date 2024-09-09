@@ -60,7 +60,6 @@ export function packets_to_tracks(update_packets: Array<UpdatePacket>): Array<Pl
 
   for (const packet of update_packets) {
     let track = packet.toPlane();
-	console.log("Parsed track: ", track)
     tracks.push(track)
   }
 

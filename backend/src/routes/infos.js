@@ -1,3 +1,4 @@
+import { querySingleHistory } from '../lib/utils/prom_util.js';
 import {
     checkClientOrigin,
     quickCloseResponse,
@@ -17,6 +18,7 @@ export default {
                 .writeStatus("400")
                 .writeHeader("Access-Control-Allow-Origin", "https://sxmaa.net")
                 .end()
+            return;
         }
 
         if (!track_id) { // Disabled as long as I still have faulty ids || track_id.length != 7) {
@@ -40,7 +42,7 @@ export default {
                     "message",
                     'Successfully found track with id "' + track_id + '".'
                 )
-                .writeHeader('content-type', 'application/json')
+                .writeHeader('Content-Type', 'application/json')
                 .writeHeader("Access-Control-Allow-Origin", origin)
                 .end(JSON.stringify(api_track));
         } else {
@@ -58,12 +60,58 @@ export default {
                 .writeHeader("Access-Control-Allow-Methods", "GET, OPTIONS")
                 .writeHeader("Access-Control-Allow-Headers", "*")
                 .end()
+            return;
         } else {
             res
                 .writeStatus("400")
                 .writeHeader("Access-Control-Allow-Origin", "https://sxmaa.net")
                 .end()
+            return;
         }
 
+    },
+    async history(res, req) {
+        /**
+         * @type {string}
+         */
+        let track_id = req.getQuery("id");
+        const origin = req.getHeader("origin")
+
+        if (!checkClientOrigin(origin)) {
+            res
+                .writeStatus("400")
+                .writeHeader("Access-Control-Allow-Origin", "https://sxmaa.net")
+                .end()
+            return;
+        }
+
+        if (!track_id) { // Disabled as long as I still have faulty ids || track_id.length != 7) {
+            quickCloseResponse(
+                res,
+                "400",
+                "Track Id not provided or in wrong format."
+            );
+            return;
+        }
+
+        const data =  await querySingleHistory(track_id)
+
+        //console.log("Got data: ", data)
+
+        if (data) {
+            // Append the last update property to the track object we send out
+            res
+                .writeStatus("200")
+                .writeHeader(
+                    "message",
+                    'Successfully found track with id "' + track_id + '".'
+                )
+                .writeHeader('Content-Type', 'application/json')
+                .writeHeader("Access-Control-Allow-Origin", origin)
+                .end(JSON.stringify(Array.from(data.entries())));
+        } else {
+            quickCloseResponse(res, "500", "ERR");
+            return;
+        }
     }
 }

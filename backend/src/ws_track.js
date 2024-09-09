@@ -38,6 +38,12 @@ APP.get(API_BASE_URL + "info",
 APP.options(API_BASE_URL + "info",
   uWSAsyncHandler((res, req) => middleware_detail.info_options(res, req))
 )
+APP.get(API_BASE_URL + "history",
+  uWSAsyncHandler((res, req) => middleware_detail.history(res, req))
+)
+APP.options(API_BASE_URL + "history",
+  uWSAsyncHandler((res, req) => middleware_detail.info_options(res, req))
+)
 
 
 // ROOT

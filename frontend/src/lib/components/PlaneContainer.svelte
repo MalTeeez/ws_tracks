@@ -9,6 +9,7 @@
 	let innerWidth = $state(0);
 	let innerHeight = $state(0);
 
+
 	const {
 		planes,
 		inter_speed,
@@ -78,7 +79,6 @@
 <div class="static">
 	{#each $planes_on_screen as [id, plane] (id)}
 		<Track {plane} height={innerHeight} width={innerWidth} {inter_speed}>
-			<p class="select-none">{id}</p>
 		</Track>
 	{/each}
 </div>
