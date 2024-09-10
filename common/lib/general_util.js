@@ -122,6 +122,27 @@ export function meterToFeet(meter) {
   return meter * 3.28084;
 }
 
+/**
+ * Get a color from a weigth from between 2 colors on a gradient
+ * @param {[number, number, number]} color1 
+ * @param {[number, number, number]} color2 
+ * @param {number} weight 
+ * @returns 
+ */
+export function pickHexfromGradient(color1, color2, weight) {
+  var p = weight;
+  var w = p * 2 - 1;
+  var w1 = (w/1+1) / 2;
+  var w2 = 1 - w1;
+  /**
+   * @type [number, number, number]
+   */
+  var rgb = [Math.round(color1[0] * w1 + color2[0] * w2),
+      Math.round(color1[1] * w1 + color2[1] * w2),
+      Math.round(color1[2] * w1 + color2[2] * w2)];
+  return rgb;
+}
+
 /* FROM https://developers.google.com/maps/documentation/tile/2d-tiles-overview
 var TILE_SIZE = 256;
 

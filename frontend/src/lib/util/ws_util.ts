@@ -1,4 +1,4 @@
-import { tracks, track_update_count, update_state } from '$lib/stores/stores';
+import { tracks, track_update_count, update_state, update_trigger } from '$lib/stores/stores';
 import { WebSocket } from 'partysocket';
 import Plane from '../../../../common/model/Plane';
 import { buffer_to_tracks } from './parse_util';
@@ -48,6 +48,7 @@ function add_listeners(ws: WebSocket) {
 }
 
 function handle_track_update(event: MessageEvent) {
+	//console.log("Handling track updates")
 	const track_updates: Plane[] = buffer_to_tracks(event.data);
 
 	track_update_count.update((count) => {
@@ -74,6 +75,7 @@ function handle_track_update(event: MessageEvent) {
 		return tracks;
 	});
 	update_state.update(() => {return true})
+	update_trigger.update((trigger) => trigger + 1);
 }
 
 export function get_ws_state(ws: WebSocket): string {

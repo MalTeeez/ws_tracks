@@ -20,6 +20,11 @@
 		selected: boolean;
 	} = $props();
 
+	interface ext_track {
+		track: Plane,
+		time: number,
+	}
+
 	let innerWidth = $state(0);
 	let innerHeight = $state(0);
 
@@ -34,9 +39,10 @@
 	let line_angle: number = $state(0);
 	let line_color: string = $state('ffffffff');
 
-	let full_track: Plane = $state(
-		parent_track,
-	);
+	let full_track: ext_track = $state({
+		track: parent_track,
+		time: Date.now(),
+	});
 
 	// #region Card positioning
 	let dist = { x: 25, y: 200 };
@@ -150,7 +156,7 @@
 				const json = await getJSON('info?id=' + parent_track.id);
 				// And parse that data into our updated track
 				if (json.last_update != last_actual_update) {
-					full_track = new Plane(
+					full_track = { track: new Plane(
 						json.id,
 						json.x_lon,
 						json.y_lat,
@@ -158,7 +164,7 @@
 						json.altitude,
 						json.airspeed,
 						json.rate_of_climb,
-					);
+					), time: json.last_update };
 					last_actual_update = json.last_update;
 				}
 			}).catch((err) =>
@@ -180,7 +186,7 @@
 	role="group"
 >
 	<div class="relative true-middle pointer-events-auto">
-		<input type="range" min="1" max="120" bind:value={history_range}>
+		<!-- <input type="range" min="1" max="120" bind:value={history_range}> -->
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
 			class="interpolate-height min-w-60 max-w-64 drop-shadow-xl backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90 rounded-lg overflow-hidden"
@@ -271,7 +277,7 @@
 							title="Latitude"
 							unit_multi="minutes"
 							unit_single="minute"
-							value={full_track.x_lon}
+							value={full_track.track.x_lon}
 							{inter_speed}
 							decimals={3}
 						></TrackInfo>
@@ -279,7 +285,7 @@
 							title="Longitude"
 							unit_multi="minutes"
 							unit_single="minute"
-							value={full_track.y_lat}
+							value={full_track.track.y_lat}
 							{inter_speed}
 							decimals={3}
 						></TrackInfo>
@@ -287,7 +293,7 @@
 							title="Airspeed"
 							unit_multi="knots"
 							unit_single="knot"
-							value={full_track.get_safe_spd()}
+							value={full_track.track.get_safe_spd()}
 							{inter_speed}
 							decimals={1}
 						></TrackInfo>
@@ -295,7 +301,7 @@
 							title="Heading"
 							unit_multi="degrees"
 							unit_single="degree"
-							value={full_track.get_safe_rot()}
+							value={full_track.track.get_safe_rot()}
 							{inter_speed}
 							decimals={1}
 						></TrackInfo>
@@ -303,7 +309,7 @@
 							title="Altitude"
 							unit_multi="feet"
 							unit_single="foot"
-							value={full_track.get_safe_alt()}
+							value={full_track.track.get_safe_alt()}
 							{inter_speed}
 							decimals={0}
 						></TrackInfo>
@@ -311,7 +317,7 @@
 							title="Climb Rate"
 							unit_multi="feet/min"
 							unit_single="feet/min"
-							value={full_track.get_safe_roc()}
+							value={full_track.track.get_safe_roc()}
 							{inter_speed}
 							decimals={1}
 						></TrackInfo>

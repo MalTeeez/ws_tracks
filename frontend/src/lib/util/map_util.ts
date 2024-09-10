@@ -17,7 +17,7 @@ import {
 	RETINATILES_API_KEY,
 } from '../../.config.json';
 import { writable, type Writable } from 'svelte/store';
-import { update_state } from '$lib/stores/stores';
+import { update_state, update_trigger } from '$lib/stores/stores';
 
 let MAP: LeafletMap | undefined = undefined;
 export let map_bounds: Writable<LatLngBounds>;
@@ -139,6 +139,7 @@ function updateBounds() {
     if (MAP) {
         map_bounds.set(MAP.getBounds());
 		update_state.update(() => {return false})
+		update_trigger.update((trigger) => trigger - 1);
     }
 }
 
