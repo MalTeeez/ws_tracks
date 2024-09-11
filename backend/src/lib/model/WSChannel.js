@@ -1,7 +1,7 @@
 //@ts-check
 import Plane from "../../../../common/model/Plane.js";
 import { APP } from "../../ws_track.js";
-import { track_updates_to_buffer } from '../utils/track_util.js';
+import { track_deletes_to_buffer, track_updates_to_buffer } from '../utils/track_util.js';
 
 /**
  * @class
@@ -23,6 +23,10 @@ export class WebSocketChannel {
    * @type {Set<string>}
    */
   track_updates = new Set();
+  /**
+   * @type {Set<string>}
+   */
+  track_deletes = new Set();
   /**
    * @type {boolean}
    */
@@ -72,19 +76,22 @@ export class WebSocketChannel {
     if (subs > 0) {
       
       // Construct ws message
-      /**
-       * @type {ArrayBuffer}
-       */
-      const message = track_updates_to_buffer(this.track_updates.keys(), this.plane_state_tracker)
+      const update_msg = track_updates_to_buffer(this.track_updates.keys(), this.plane_state_tracker)
+      const delete_msg = track_deletes_to_buffer(this.track_deletes.keys())
+
       //console.log("Sending out " + this.track_updates.size + " tracks on channel " + this.ws_channel_id)
       // And send it out to listeners (only if it has entries)
       if (this.track_updates.size > 0) {
-        APP.publish(this.ws_channel_id, message, true, true);
+        APP.publish(this.ws_channel_id, update_msg, true, true);
+      }
+      if (this.track_deletes.size > 0) {
+        APP.publish(this.ws_channel_id, delete_msg, true, true);
       }
     }
     // Clear the updates afterwards, so we dont have them stacking up for nothing
     if (!this.updating) {
       this.track_updates = new Set();
+      this.track_deletes = new Set();
     }
   }
 
@@ -96,6 +103,18 @@ export class WebSocketChannel {
     this.updating = true;
     uni_track_updates.forEach((id) => {
       this.track_updates.add(id)
+    });
+    this.updating = false;
+  }
+
+    /**
+   * Append a set of id of updated planes to the stored one for this channel
+   * @param {Array<string>} del_track_updates array of id of planes
+   */
+  append_track_deletes(del_track_updates) {
+    this.updating = true;
+    del_track_updates.forEach((id) => {
+      this.track_deletes.add(id)
     });
     this.updating = false;
   }

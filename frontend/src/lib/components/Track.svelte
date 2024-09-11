@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import Plane from '../../../../common/model/Plane.js';
 	import TrackCard from './TrackCard.svelte';
 	import { tweened } from 'svelte/motion';
@@ -26,6 +25,7 @@
 	function changeColor() {
 		color = color === '#ff0000' ? '#0044ff' : '#ff0000';
 	}
+	let prev_heading: number = 0;
 
 	let x_pos = tweened<undefined | number>(undefined, {
 		duration: inter_speed,
@@ -66,10 +66,18 @@
 					easing: linear,
 				});
 
+				let update_speed;
+				if (Math.abs(plane.get_safe_rot() - prev_heading) > 300) {
+					update_speed = 0;
+				} else {
+					update_speed = inter_speed;
+				}
+
 				heading.set(plane.get_safe_rot(), {
-					duration: inter_speed,
+					duration: update_speed,
 					easing: linear,
 				});
+				prev_heading = plane.get_safe_rot();
 			});
 		}
 		// Update is map update, so we dont need to interpolate, or update heading

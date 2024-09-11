@@ -1,6 +1,7 @@
 import Plane from '../../../../common/model/Plane.js';
+import Packet from '../../../../common/model/packet/PacketInterface.js';
 import UpdatePacket from '../../../../common/model/packet/UpdatePacket.js'
-
+import DeletePacket from '../../../../common/model/packet/DeletePacket.js'
 
 export function parse_track_string(track_msg: string): Array<Plane> {
 	const tracks: Array<Plane> = new Array<Plane>();
@@ -32,22 +33,43 @@ export function parse_track_string(track_msg: string): Array<Plane> {
  * @param {ArrayBuffer} buffer
  * @returns {Array<UpdatePacket>}
  */
-export function buffer_to_packets(buffer: ArrayBuffer): Array<UpdatePacket> {
+export function buffer_to_update_packets(buffer: ArrayBuffer): Array<UpdatePacket> {
+	const size = UpdatePacket.SIZE;
 	let update_packet_array: Array<UpdatePacket> = new Array();
-	if (buffer.byteLength % UpdatePacket.SIZE == 0) {
-		const update_count = buffer.byteLength / UpdatePacket.SIZE;
+	if (buffer.byteLength % size == 0) {
+		const update_count = buffer.byteLength / size;
 		for (let i = 0; i < update_count; i++) {
-			const packet = UpdatePacket.fromBuffer(buffer.slice(i*UpdatePacket.SIZE, i*UpdatePacket.SIZE + UpdatePacket.SIZE));
+			const packet = UpdatePacket.fromBuffer(buffer.slice(i*size, i*size + size));
 			if (packet) {
 				update_packet_array.push(packet)
 			} else {
-				console.warn("Received faulty track update with data: ", buffer.slice(i*UpdatePacket.SIZE, i*UpdatePacket.SIZE + UpdatePacket.SIZE))
+				console.warn("Received faulty track update with data: ", buffer.slice(i*size, i*size + size))
 			}
 		}
 	}
 	return update_packet_array;
 }
 
+/**
+ * @param {ArrayBuffer} buffer
+ * @returns {Array<DeletePacket>}
+ */
+export function buffer_to_delete_packets(buffer: ArrayBuffer): Array<DeletePacket> {
+	const size = DeletePacket.SIZE;
+	let delete_packet_array: Array<DeletePacket> = new Array();
+	if (buffer.byteLength % size == 0) {
+		const update_count = buffer.byteLength / size;
+		for (let i = 0; i < update_count; i++) {
+			const packet = DeletePacket.fromBuffer(buffer.slice(i*size, i*size + size));
+			if (packet) {
+				delete_packet_array.push(packet)
+			} else {
+				console.warn("Received faulty track delete with data: ", buffer.slice(i*size, i*size + size))
+			}
+		}
+	}
+	return delete_packet_array;
+}
 
 // Similar function at backend/src/lib/track_util.js packets_to_tracks()
 /**
@@ -72,5 +94,5 @@ export function packets_to_tracks(update_packets: Array<UpdatePacket>): Array<Pl
  * @returns {Array<Plane>}
  */
 export function buffer_to_tracks(buffer: ArrayBuffer): Array<Plane> {
-	return packets_to_tracks(buffer_to_packets(buffer))
+	return packets_to_tracks(buffer_to_update_packets(buffer))
 }

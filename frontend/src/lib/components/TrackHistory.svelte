@@ -258,7 +258,7 @@
 
 	function getAltitudeColor(altitude: number) {
 		const start_color: [number, number, number] = [0, 242, 96];
-		const end_color: [number, number, number] = [5, 117, 230	];
+		const end_color: [number, number, number] = [5, 117, 230];
 
 		const max_alt = 32786;
 		altitude = Math.min(altitude, max_alt) / max_alt;
@@ -275,7 +275,7 @@
 				class="line z-17"
 				style="
                     left:{track.x}px; 
-                    top:{track.y}px; 
+                    top:{track.y + 2}px; 
                     width:{track.length}px; 
                     transform: rotate({track.angle}deg); 
                     background-color: rgba({track.color[0]},{track.color[1]},{track.color[2]}, 1)

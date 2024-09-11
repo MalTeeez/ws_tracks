@@ -3,6 +3,7 @@ import Plane from "../../../../common/model/Plane.js";
 import { queryInstant } from "./prom_util.js";
 import { utf16_to_utf8, deep_equal, generateRandomString, random_int, utf8_to_utf16, random_float } from "../../../../common/lib/general_util.js";
 import UpdatePacket from "../../../../common/model/packet/UpdatePacket.js";
+import DeletePacket from "../../../../common/model/packet/DeletePacket.js";
 
 
 /**
@@ -38,13 +39,18 @@ export function update_tracks_randomly(track_list, update_amount, max_x, max_y) 
  * Update tracks with randomly generated ones (+-5 moves)
  * @param {Map<string,Plane>} track_list A reference to a map containing the previous state
  * @param {Map<string, number>} last_update_list A reference to a map containing the timestamp of all tracks latest update
- * @returns {Promise<Array<string>>} A list of id's from the track_list that were updated
+ * @returns {Promise<[Array<string>, Array<string>]>} A list of id's from the track_list that were updated
  */
 export async function update_tracks_prometheus(track_list, last_update_list) {
   /**
    * @type {Array<string>}
    */
   let uni_track_updates = [];
+    /**
+   * @type {Array<string>}
+   */
+  let del_track_updates = [];
+
   const prom_tracks = await queryInstant();
 
   if (prom_tracks) {
@@ -63,13 +69,14 @@ export async function update_tracks_prometheus(track_list, last_update_list) {
         if (!prom_tracks.has(id)) {
           track_list.delete(id);
           last_update_list.delete(id);
+          del_track_updates.push(id);
           //console.log("Removed out-of-date track " + id);
         }
       }
     }
   }
   //console.log("Prometheus had " + uni_track_updates.length + " track updates");
-  return uni_track_updates;
+  return [uni_track_updates, del_track_updates];
 }
 
 
@@ -99,11 +106,11 @@ export function plane_to_message(plane) {
 
 
 /**
- * Convert a list of track updates to an ArrayBuffer of tracks
+ * Convert a list of track updates to an ArrayBuffer of packets
  * This function is a wrapper for tracks_to_buffer()
  * @param {IterableIterator<string>} track_updates Your track updates array filled with ids
  * @param {Map<string,Plane>} plane_list A reference to a map containing the previous state
- * @returns {ArrayBuffer} Your ArrayBuffer filled with tracks
+ * @returns {Uint8Array} Your ArrayBuffer filled with tracks
  */
 export function track_updates_to_buffer(track_updates, plane_list) {
   const updated_planes = new Map();
@@ -126,9 +133,27 @@ export function track_updates_to_buffer(track_updates, plane_list) {
     offset += UpdatePacket.SIZE;
   }
   
-  const buffer = new Uint8Array(uint8_list).buffer;
+  return new Uint8Array(uint8_list);
+}
 
-  return buffer;
+/**
+ * Convert a list of delete updates to an ArrayBuffer of packets
+ * @param {IterableIterator<string>} track_deletes Your track deletes array filled with ids
+ * @returns {Uint8Array} Your ArrayBuffer filled with tracks
+ */
+export function track_deletes_to_buffer(track_deletes) {
+  let uint8_list = new Array();
+  let offset = 0;
+  for (const id of track_deletes) {
+    const packet = new DeletePacket(id);
+    const packet_uint8_arr = new Uint8Array(packet.serialize())
+    for (let i = 0; i < DeletePacket.SIZE; i++) {
+      uint8_list[offset + i] = packet_uint8_arr[i];
+    }
+    offset += DeletePacket.SIZE;
+  }
+  
+  return new Uint8Array(uint8_list);
 }
 
 /**

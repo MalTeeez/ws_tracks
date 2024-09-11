@@ -67,12 +67,13 @@ export class WebSocketTrackServer {
           // TODO: Add track deletion messages to clients (see update_tracks_prometheus ending)
 
           // Get new changes from our datasource
-          let uni_track_updates = await update_tracks_prometheus(this.#planes, this.#track_update_times);
+          const [uni_track_updates, del_track_updates] = await update_tracks_prometheus(this.#planes, this.#track_update_times);
 
           // Append new track updates to all channels
           for (const channel of this.ws_track_channels) {
             //if (channel.update_interval == 500) console.log("Pushing " + uni_track_updates.length + " tracks to 500")
             channel.append_track_updates(uni_track_updates);
+            channel.append_track_deletes(del_track_updates);
           }
 
           setTimeout(() => {

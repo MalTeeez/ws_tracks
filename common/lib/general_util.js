@@ -124,9 +124,9 @@ export function meterToFeet(meter) {
 
 /**
  * Get a color from a weigth from between 2 colors on a gradient
- * @param {[number, number, number]} color1 
- * @param {[number, number, number]} color2 
- * @param {number} weight 
+ * @param {[number, number, number]} color1 The gradients start color
+ * @param {[number, number, number]} color2 The gradients end color 
+ * @param {number} weight A normalized weight, which represents the colors position
  * @returns 
  */
 export function pickHexfromGradient(color1, color2, weight) {

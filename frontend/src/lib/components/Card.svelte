@@ -1,20 +1,21 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	let visible: boolean = true;
-	const {
+	let {
 		title,
 		children,
+		enabled = $bindable(),
 	}: {
 		title: string;
 		children: Snippet;
+		enabled: boolean;
 	} = $props();
 </script>
 
 <div class="relative">
-	<button class="absolute top-2 right-2 z-30">
+	<button class="absolute top-2 right-2 z-30" onclick={() => {enabled = !enabled}}>
 		<svg
-			class="fill-slate-400 cursor-pointer pointer-events-auto"
+			class="fill-slate-900 cursor-pointer pointer-events-auto drop-shadow-lg"
 			width="24"
 			height="24"
 			viewBox="0 0 1000 1000"
@@ -27,7 +28,7 @@
 	<!-- right-0 -->
 	<section 
 		id="card"
-		class="flex mx-auto left-0 top-0 min-w-52 max-w-60 min-h-[22.6rem] flex-col gap-2 py-6 px-8 drop-shadow-xl text-center backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90"
+		class="flex mx-auto left-0 top-0 min-w-52 max-w-60 flex-col gap-2 py-6 px-8 drop-shadow-xl text-center backdrop-blur-lg backdrop-saturate-[1.1] backdrop-brightness-90"
 	>
 		<h1 class="mb-2 text-xl text-center font-bold select-none">{title}</h1>
 		<div class="flex flex-col gap-4">

@@ -153,7 +153,11 @@
 				setTimeout(() => resolve(), inter_speed);
 
 				// Get json data from the info api endpoint
-				const json = await getJSON('info?id=' + parent_track.id);
+				const json = await getJSON('info?id=' + parent_track.id).catch(
+					(err) => {
+						console.warn("Track update failed with: ", err)
+					}
+				);
 				// And parse that data into our updated track
 				if (json.last_update != last_actual_update) {
 					full_track = { track: new Plane(

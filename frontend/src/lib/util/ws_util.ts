@@ -1,7 +1,14 @@
-import { tracks, track_update_count, update_state, update_trigger } from '$lib/stores/stores';
+import {
+	tracks,
+	track_update_count,
+	update_state,
+	update_trigger,
+} from '$lib/stores/stores';
 import { WebSocket } from 'partysocket';
 import Plane from '../../../../common/model/Plane';
-import { buffer_to_tracks } from './parse_util';
+import { buffer_to_delete_packets, buffer_to_tracks } from './parse_util';
+import UpdatePacket from '../../../../common/model/packet/UpdatePacket';
+import DeletePacket from '../../../../common/model/packet/DeletePacket';
 
 let ws: WebSocket;
 let base_url: string = 'sxmaa.net:9001/tracks';
@@ -44,12 +51,26 @@ function add_listeners(ws: WebSocket) {
 		console.log('WS closed');
 	});
 
-	ws.addEventListener('message', handle_track_update);
+	ws.addEventListener('message', handle_message);
 }
 
-function handle_track_update(event: MessageEvent) {
-	//console.log("Handling track updates")
-	const track_updates: Plane[] = buffer_to_tracks(event.data);
+function handle_message(event: MessageEvent) {
+	if (event.data.byteLength) {
+		const buffer = event.data;
+		// Get this messages type from first packet
+		const id = new DataView(buffer).getUint8(0);
+		if (id == UpdatePacket.ID) {
+			handle_track_update(buffer);
+		} else if (id == DeletePacket.ID) {
+			handle_track_deletion(buffer);
+		} else {
+			console.log('Failed to indendify message type. Starter ID: ', id);
+		}
+	}
+}
+
+function handle_track_update(buffer: ArrayBuffer) {
+	const track_updates: Plane[] = buffer_to_tracks(buffer);
 
 	track_update_count.update((count) => {
 		count += track_updates.length;
@@ -74,8 +95,21 @@ function handle_track_update(event: MessageEvent) {
 
 		return tracks;
 	});
-	update_state.update(() => {return true})
+	update_state.update(() => {
+		return true;
+	});
 	update_trigger.update((trigger) => trigger + 1);
+}
+
+function handle_track_deletion(buffer: ArrayBuffer) {
+	const track_deletes: DeletePacket[] = buffer_to_delete_packets(buffer);
+
+	tracks.update((tracks) => {
+		for (const packet of track_deletes) {
+			tracks.delete(packet.track_id);
+		}
+		return tracks;
+	});
 }
 
 export function get_ws_state(ws: WebSocket): string {
