@@ -12,6 +12,7 @@
 		"strict": true,
 		"allowSyntheticDefaultImports": true,
 		"noUncheckedIndexedAccess": true,
-		"moduleResolution": "bundler"
+		"moduleResolution": "bundler",
+		"verbatimModuleSyntax": false
 	}
 }

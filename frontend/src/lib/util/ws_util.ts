@@ -3,6 +3,7 @@ import {
 	track_update_count,
 	update_state,
 	update_trigger,
+	ext_track,
 } from '$lib/stores/stores';
 import { WebSocket } from 'partysocket';
 import Plane from '../../../../common/model/Plane';
@@ -80,16 +81,18 @@ function handle_track_update(buffer: ArrayBuffer) {
 		for (const track of track_updates) {
 			if (tracks.has(track.id)) {
 				// Plane already exists, but we have to replace it to update the svelte reactions
-				let old_plane: Plane | undefined = tracks.get(track.id);
+				let old_plane: ext_track | undefined = tracks.get(track.id);
 				if (old_plane) {
-					old_plane.x_lon = track.x_lon;
-					old_plane.y_lat = track.y_lat;
-					old_plane.altitude = track.get_safe_alt();
-					old_plane.rotation = track.get_safe_rot();
+					old_plane.track.x_lon = track.x_lon;
+					old_plane.track.y_lat = track.y_lat;
+					old_plane.track.altitude = track.get_safe_alt();
+					old_plane.track.rotation = track.get_safe_rot();
+					old_plane.time = Date.now();
 				}
 			} else {
-				// Plane is new, so we can take the instantiated one
-				tracks.set(track.id, track);
+				// Plane is new, so we can take the instantiated one and pack it with a ts
+				const ext_track: ext_track = { track: track, time: Date.now(), following: false }
+				tracks.set(track.id, ext_track);
 			}
 		}
 

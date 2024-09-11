@@ -1,8 +1,14 @@
 import { writable, type Writable } from 'svelte/store';
 import Plane from '../../../../common/model/Plane.js';
 
-export const tracks: Writable<Map<string, Plane>> = writable(
-	new Map<string, Plane>(),
+export type ext_track = {
+	track: Plane;
+	time: number;
+	following: boolean;
+}
+
+export const tracks: Writable<Map<string, ext_track>> = writable(
+	new Map<string, ext_track>(),
 );
 
 export const track_update_count: Writable<number> = writable(0);

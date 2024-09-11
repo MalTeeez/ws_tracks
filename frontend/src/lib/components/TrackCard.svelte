@@ -5,6 +5,7 @@
 	import TrackInfo from './TrackInfo.svelte';
 	import { getJSON } from '$lib/util/fetch_util';
 	import TrackHistory from './TrackHistory.svelte';
+	import { type ext_track } from '$lib/stores/stores';
 
 	let {
 		parent_track,
@@ -13,22 +14,19 @@
 		inter_speed,
 		selected = $bindable(),
 	}: {
-		parent_track: Plane;
+		parent_track: ext_track;
 		parent_x: number;
 		parent_y: number;
 		inter_speed: number;
 		selected: boolean;
 	} = $props();
 
-	interface ext_track {
-		track: Plane,
-		time: number,
-	}
-
 	let innerWidth = $state(0);
 	let innerHeight = $state(0);
 
 	let history_range = $state(60);
+
+	let synced_follow = $state(parent_track.following)
 
 	let mainCardElement: HTMLDivElement;
 	let card_height: number = $state(-1);
@@ -40,8 +38,9 @@
 	let line_color: string = $state('ffffffff');
 
 	let full_track: ext_track = $state({
-		track: parent_track,
+		track: parent_track.track,
 		time: Date.now(),
+		following: parent_track.following
 	});
 
 	// #region Card positioning
@@ -153,7 +152,7 @@
 				setTimeout(() => resolve(), inter_speed);
 
 				// Get json data from the info api endpoint
-				const json = await getJSON('info?id=' + parent_track.id).catch(
+				const json = await getJSON('info?id=' + parent_track.track.id).catch(
 					(err) => {
 						console.warn("Track update failed with: ", err)
 					}
@@ -168,7 +167,7 @@
 						json.altitude,
 						json.airspeed,
 						json.rate_of_climb,
-					), time: json.last_update };
+					), time: json.last_update, following: parent_track.following };
 					last_actual_update = json.last_update;
 				}
 			}).catch((err) =>
@@ -205,7 +204,7 @@
 					<div
 						class="text-sm pl-1 font-sans font-semibold tracking-wide overline select-none"
 					>
-						{parent_track.id} {history_range}m
+						{parent_track.track.id}
 					</div>
 					<div class="flex flex-row-reverse">
 						<button
@@ -234,7 +233,7 @@
 							>
 						</button>
 						
-						<button class="" onclick={() => window.open('https://grafana.sxmaa.net/d/ac48e9d2-666d-4681-95d9-54ae9e7739b3/flight-track-testboard?orgId=1&refresh=5s&var-flight=' + parent_track.id)}>
+						<button class="" onclick={() => window.open('https://grafana.sxmaa.net/d/ac48e9d2-666d-4681-95d9-54ae9e7739b3/flight-track-testboard?orgId=1&refresh=5s&var-flight=' + parent_track.track.id)}>
 							<svg
 								class="fill-slate-50 cursor-pointer pointer-events-auto"
 								width="20"
@@ -266,6 +265,27 @@
 									xmlns="http://www.w3.org/2000/svg"
 									><path
 										d=" M 788 375C 788 375 788 500 788 500C 788 526 775 545 760 560C 745 575 726 588 700 588C 700 588 438 588 438 588C 438 588 438 650 438 650C 437 680 404 698 379 681C 379 681 234 584 234 584C 221 578 212 565 212 551C 212 551 212 551 212 551C 212 550 212 550 212 550C 212 535 221 522 234 516C 234 516 379 419 379 419C 404 402 437 420 438 450C 438 450 438 513 438 513C 438 513 700 513 700 513C 698 513 703 511 707 507C 711 503 713 498 713 500C 713 500 713 375 713 375C 712 354 729 337 749 337C 771 337 788 354 788 375C 788 375 788 375 788 375"
+									/></svg
+								>
+							</button>
+						{/if}
+						{#if !synced_follow}
+							<button
+								class=""
+								onclick={() => {
+									parent_track.following = !parent_track.following;
+									synced_follow = parent_track.following;
+								}}
+							>
+							<svg
+									class="fill-slate-50 cursor-pointer pointer-events-auto"
+									width="20"
+									height="20"
+									viewBox="0 0 1000 1000"
+									visibility={icon_visibility}
+									xmlns="http://www.w3.org/2000/svg"
+									><path
+										d=" M 537 75C 537 96 537 118 537 139 707 157 843 293 861 462 882 462 904 462 925 462 946 462 962 479 962 500 962 521 946 537 925 537 904 537 882 537 861 537 843 707 707 843 537 861 537 882 537 904 537 925 537 946 521 962 500 962 479 962 462 946 462 925 462 904 462 882 462 861 293 843 157 707 139 537 118 537 96 537 75 537 54 537 38 521 38 500 38 479 54 462 75 462 96 462 118 462 139 462 157 293 293 157 462 139 462 118 462 96 462 75 462 54 479 38 500 38 521 38 537 54 537 75ZM 215 462C 243 462 272 462 300 462 321 462 337 479 337 500 337 521 321 537 300 537 272 537 243 537 215 537 232 667 333 768 462 785 462 757 462 728 462 700 462 679 479 662 500 662 521 662 537 679 537 700 537 728 537 757 537 785 667 768 768 667 785 537 757 537 728 537 700 537 679 537 662 521 662 500 662 479 679 462 700 462 728 462 757 462 785 462 768 333 667 232 537 215 537 243 537 272 537 300 537 321 521 337 500 337 479 337 462 321 462 300 462 272 462 243 462 215 333 232 232 333 215 462ZM 562 500C 562 534 534 562 500 562 466 562 437 534 437 500 437 466 466 437 500 437 534 437 562 466 562 500Z"
 									/></svg
 								>
 							</button>

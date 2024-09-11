@@ -12,6 +12,7 @@
 	import { browser } from '$app/environment';
 	import { changeChannel } from '$lib/util/ws_util';
 	import { getInterval } from '../../../common/lib/time_util.js';
+	import { fade } from 'svelte/transition';
 
 	export let interval: number = 500;
 
@@ -50,7 +51,7 @@
 			<PlaneContainer planes={tracks} inter_speed={interval}></PlaneContainer>
 		</div>
 		{#if card_active}
-			<div class="relative left-0 top-[18%] z-30 w-fit overflow-hidden">
+			<div class="relative left-0 top-[18%] z-30 w-fit overflow-hidden" transition:fade={{duration: 100}}>
 				<div
 					id="center_content"
 					class="static flex flex-col items-center gap-y-4 px-8"

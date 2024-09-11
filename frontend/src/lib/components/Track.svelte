@@ -1,10 +1,9 @@
 <script lang="ts">
-	import Plane from '../../../../common/model/Plane.js';
 	import TrackCard from './TrackCard.svelte';
 	import { tweened } from 'svelte/motion';
 	import { linear } from 'svelte/easing';
-	import { projectCoords } from '$lib/util/map_util.js';
-	import { update_state } from '$lib/stores/stores.js';
+	import { panMap, projectCoords } from '$lib/util/map_util.js';
+	import { update_state, type ext_track } from '$lib/stores/stores.js';
 
 	let size: number = 0.5;
 	let color = $state('#ff0000');
@@ -16,11 +15,13 @@
 		width,
 		height,
 	}: {
-		plane: Plane;
+		plane: ext_track;
 		inter_speed: number;
 		width: number;
 		height: number;
 	} = $props();
+
+	let last_actual_update = 0;
 
 	function changeColor() {
 		color = color === '#ff0000' ? '#0044ff' : '#ff0000';
@@ -45,16 +46,16 @@
 	$effect(() => {
 		const coords = projectCoords(
 			{
-				lat: plane.y_lat,
-				lng: plane.x_lon,
-				alt: plane.get_safe_alt(),
+				lat: plane.track.y_lat,
+				lng: plane.track.x_lon,
+				alt: plane.track.get_safe_alt(),
 			},
 			width,
 			height,
 		);
 
 		// Update is track update, so we interpolate
-		if ($update_state) {
+		if ($update_state && plane.time > last_actual_update) {
 			setTimeout(() => {
 				x_pos.set(coords.x, {
 					duration: inter_speed,
@@ -67,31 +68,39 @@
 				});
 
 				let update_speed;
-				if (Math.abs(plane.get_safe_rot() - prev_heading) > 300) {
+				if (Math.abs(plane.track.get_safe_rot() - prev_heading) > 300) {
 					update_speed = 0;
 				} else {
 					update_speed = inter_speed;
 				}
 
-				heading.set(plane.get_safe_rot(), {
+				heading.set(plane.track.get_safe_rot(), {
 					duration: update_speed,
 					easing: linear,
 				});
-				prev_heading = plane.get_safe_rot();
+				prev_heading = plane.track.get_safe_rot();
+
+				// Tracking logic
+				if (plane.following) {
+					panMap([plane.track.y_lat, plane.track.x_lon], inter_speed / 1000)
+				}
 			});
+			last_actual_update = plane.time;
 		}
 		// Update is map update, so we dont need to interpolate, or update heading
 		else {
 			setTimeout(() => {
-				x_pos.set(coords.x, {
-					duration: 0,
-					easing: linear,
-				});
+				if (!plane.following) {
+					x_pos.set(coords.x, {
+						duration: 0,
+						easing: linear,
+					});
 
-				y_pos.set(coords.y, {
-					duration: 0,
-					easing: linear,
-				});
+					y_pos.set(coords.y, {
+						duration: 0,
+						easing: linear,
+					});
+				}
 			});
 		}
 	});
@@ -130,8 +139,8 @@
 
 <!-- <div
 	id="true-middle-indicator"
-	class="true-middle bg-yellow-400 absolute h-1 w-1 z-50"
-	style="left: {$x_pos}px; top: {$y_pos}px; transform: translate(-50%, -50%);"
+	class="bg-yellow-400 absolute h-1 w-1 z-50"
+	style="left: {prev_pos.x}px; top: {prev_pos.y}px; transform: translate(-50%, -50%);"
 ></div> -->
 
 <div class="absolute z-20" style="left: {$x_pos}px; top: {$y_pos}px;">
@@ -171,7 +180,7 @@
 		<div
 			class="antialiased font-bold text-xs text-left text-slate-200 bg-[#22222244] rounded-md px-0.5 leading-4 text drop-shadow-lg"
 		>
-			<p class="select-none" transition:typewriter={{speed: 1.25}}>{plane.id}</p>
+			<p class="select-none" transition:typewriter={{speed: 1.25}}>{plane.track.id}</p>
 		</div>
 	</div>
 </div>

@@ -39,13 +39,14 @@
 		spd: number;
 		time: number;
 		color: [number, number, number];
+		show_counter: boolean;
 	}
 
 	// TODO: Length on zoom change not updating?
 	//       Current line updates & push onto stack if changed
 
 	let last_actual_update: number = 0;
-
+	let timestamp_counter: number = 0;
 	let history_range_millis = $state(0);
 
 	$effect(() => {
@@ -68,6 +69,11 @@
 				const prev_point = track_history.at(-1);
 				let point: map_point;
 
+				// Handle our timestamp counter
+				timestamp_counter++;
+				const show_counter = timestamp_counter % 10 == 0;
+				if (timestamp_counter >= 10) timestamp_counter = 0;
+
 				if (prev_point) {
 					const line = calcLine(
 						entry[1].x_lon,
@@ -87,7 +93,8 @@
 						alt: entry[1].altitude,
 						spd: entry[1].airspeed,
 						time: entry[0],
-						color: getAltitudeColor(entry[1].altitude)
+						color: getAltitudeColor(entry[1].altitude),
+						show_counter: show_counter,
 					};
 				} else {
 					const coords = projectCoords(
@@ -110,7 +117,8 @@
 						alt: entry[1].altitude,
 						spd: entry[1].airspeed,
 						time: entry[0],
-						color: getAltitudeColor(entry[1].altitude)
+						color: getAltitudeColor(entry[1].altitude),
+						show_counter: show_counter,
 					};
 				}
 
@@ -166,6 +174,11 @@
 				if (last_actual_update < current_track.time) {
 					const prev_point = track_history.at(-1);
 
+					// Handle our timestamp counter
+					timestamp_counter++;
+					const show_counter = timestamp_counter % 10 == 0;
+					if (timestamp_counter >= 10) timestamp_counter = 0;
+
 					if (prev_point) {
 						const line = calcLine(
 							current_track.track.x_lon,
@@ -185,7 +198,8 @@
 							alt: current_track.track.get_safe_alt(),
 							spd: current_track.track.get_safe_spd(),
 							time: current_track.time,
-							color: getAltitudeColor(current_track.track.get_safe_alt())
+							color: getAltitudeColor(current_track.track.get_safe_alt()),
+							show_counter: show_counter,
 						};
 						setTimeout(() => {
 							if (current_point) {
@@ -280,7 +294,19 @@
                     transform: rotate({track.angle}deg); 
                     background-color: rgba({track.color[0]},{track.color[1]},{track.color[2]}, 1)
                 "
-			></div>
+			>
+				{#if track.show_counter}
+					{#if track.angle && track.angle > 0 && track.angle > -170}
+						<div style="transform: rotate({track.angle * -1}deg); ">
+							<p class="text-slate-800 font-bold font-mono drop-shadow-lg z-18">{new Date(track.time).getHours() + ":" + new Date(track.time).getMinutes()}
+							</p>
+						</div>
+					{:else}
+						<p class="text-slate-800 font-bold font-mono drop-shadow-lg z-18">{new Date(track.time).getHours() + ":" + new Date(track.time).getMinutes()}
+						</p>
+					{/if}
+				{/if}
+			</div>
 		</div>
 	{/if}
 {/each}

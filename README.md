@@ -18,8 +18,8 @@ UI to display plane tracks from a time-independent datasource
 - [x] get page tree layout working without absolute
 - [x] design track popup window, and fill with http req
 - [x] create a packet framework, to allow different binary packets
-- [ ] move map with optionally followed plane
-- [ ] fix plane loosing position when throwing map
+- [/] move map with optionally followed plane
+- [x] fix plane loosing position when throwing map
 
 ## links:
 - Svelte 5 docs: https://svelte-5-preview.vercel.app/docs/introduction

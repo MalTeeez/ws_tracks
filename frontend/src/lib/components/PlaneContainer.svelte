@@ -1,8 +1,7 @@
 <script lang="ts">
-	import Plane from '../../../../common/model/Plane.js';
 	import { writable, type Writable } from 'svelte/store';
 	import Track from './Track.svelte';
-	import { rendered_plane_count } from '$lib/stores/stores.js';
+	import { rendered_plane_count, type ext_track } from '$lib/stores/stores.js';
 	import { map_bounds } from '$lib/util/map_util.js';
 	import { feetToMeter } from '../../../../common/lib/general_util.js';
 
@@ -14,12 +13,12 @@
 		planes,
 		inter_speed,
 	}: {
-		planes: Writable<Map<string, Plane>>;
+		planes: Writable<Map<string, ext_track>>;
 		inter_speed: number;
 	} = $props();
 
-	const planes_on_screen: Writable<Map<string, Plane>> = writable(
-		new Map<string, Plane>(),
+	const planes_on_screen: Writable<Map<string, ext_track>> = writable(
+		new Map<string, ext_track>(),
 	);
 
 	$effect(() => {
@@ -31,22 +30,22 @@
 				for (const [key, track] of $planes) {
 					if (
 						$map_bounds.contains({
-							lat: track.y_lat,
-							lng: track.x_lon,
-							alt: feetToMeter(track.get_safe_alt()),
+							lat: track.track.y_lat,
+							lng: track.track.x_lon,
+							alt: feetToMeter(track.track.get_safe_alt()),
 						})
 					) {
-						if (planes_on_screen.has(track.id)) {
+						if (planes_on_screen.has(track.track.id)) {
 							// Plane already exists, but we have to replace it to update the svelte reactions
-							let old_plane: Plane | undefined = planes_on_screen.get(track.id);
+							let old_plane: ext_track | undefined = planes_on_screen.get(track.track.id);
 							if (old_plane) {
-								old_plane.x_lon = track.x_lon;
-								old_plane.y_lat = track.y_lat;
-								old_plane.altitude = track.get_safe_alt();
+								old_plane.track.x_lon = track.track.x_lon;
+								old_plane.track.y_lat = track.track.y_lat;
+								old_plane.track.altitude = track.track.get_safe_alt();
 							}
 						} else {
 							// Plane is new, so we can take the instantiated one
-							planes_on_screen.set(track.id, track);
+							planes_on_screen.set(track.track.id, track);
 						}
 						$planes_on_screen.set(key, track);
 					}
@@ -58,9 +57,9 @@
 					}
 					if (
 						!$map_bounds.contains({
-							lat: track.y_lat,
-							lng: track.x_lon,
-							alt: feetToMeter(track.get_safe_alt()),
+							lat: track.track.y_lat,
+							lng: track.track.x_lon,
+							alt: feetToMeter(track.track.get_safe_alt()),
 						})
 					) {
 						$planes_on_screen.delete(key);

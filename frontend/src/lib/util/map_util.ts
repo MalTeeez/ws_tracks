@@ -1,12 +1,12 @@
 import type {
 	Map as LeafletMap,
-    MapOptions,
+	MapOptions,
 	LeafletEvent,
 	LatLng,
-    LatLngBounds,
+	LatLngBounds,
 	LatLngExpression,
 	Point,
-	LatLngLiteral
+	LatLngLiteral,
 } from 'leaflet';
 import {
 	GOOGLEMAPS_API_KEY,
@@ -17,7 +17,7 @@ import {
 	RETINATILES_API_KEY,
 } from '../../.config.json';
 import { writable, type Writable } from 'svelte/store';
-import { update_state, update_trigger } from '$lib/stores/stores';
+import { tracks, update_state, update_trigger } from '$lib/stores/stores';
 
 let MAP: LeafletMap | undefined = undefined;
 export let map_bounds: Writable<LatLngBounds>;
@@ -26,12 +26,12 @@ interface MapEntry {
 	id: string;
 	url: string;
 	attribution: string;
-    size: number;
-    zoom_offset: number;
+	size: number;
+	zoom_offset: number;
 }
 
 export function getMapSourceKeys() {
-    return map_sources.keys();
+	return map_sources.keys();
 }
 
 const map_sources: Map<string, MapEntry> = new Map([
@@ -41,8 +41,8 @@ const map_sources: Map<string, MapEntry> = new Map([
 			id: 'GOOGLE_STREETS',
 			url: `https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${GOOGLEMAPS_SESSION_TOKEN_STREET}&key=${GOOGLEMAPS_API_KEY}&orientation=0`,
 			attribution: 'Google',
-            size: 256,
-            zoom_offset: 0
+			size: 256,
+			zoom_offset: 0,
 		},
 	],
 	[
@@ -51,8 +51,8 @@ const map_sources: Map<string, MapEntry> = new Map([
 			id: 'GOOGLE_SATELLITE',
 			url: `https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=${GOOGLEMAPS_SESSION_TOKEN_SATELLITE}&key=${GOOGLEMAPS_API_KEY}`,
 			attribution: 'Google',
-            size: 256,
-            zoom_offset: 0
+			size: 256,
+			zoom_offset: 0,
 		},
 	],
 	[
@@ -61,8 +61,8 @@ const map_sources: Map<string, MapEntry> = new Map([
 			id: 'MAPTILER_TOPO',
 			url: `https://api.maptiler.com/maps/topo-v2/{z}/{x}/{y}.png?key=${MAPTILER_API_KEY}`,
 			attribution: 'MapTiler',
-            size: 512,
-            zoom_offset: -1
+			size: 512,
+			zoom_offset: -1,
 		},
 	],
 	[
@@ -71,8 +71,8 @@ const map_sources: Map<string, MapEntry> = new Map([
 			id: 'MAPTILES',
 			url: `https://maptiles.p.rapidapi.com/en/map/v1/{z}/{x}/{y}.png?rapidapi-key=${MAPTILES_API_KEY}`,
 			attribution: 'Maptiles',
-            size: 256,
-            zoom_offset: 0
+			size: 256,
+			zoom_offset: 0,
 		},
 	],
 	[
@@ -81,8 +81,8 @@ const map_sources: Map<string, MapEntry> = new Map([
 			id: 'RETINATILES',
 			url: `https://retina-tiles.p.rapidapi.com/local/osm@2x/v1/{z}/{x}/{y}.png?rapidapi-key=${RETINATILES_API_KEY}`,
 			attribution: 'Retinatiles',
-            size: 256,
-            zoom_offset: 0
+			size: 256,
+			zoom_offset: 0,
 		},
 	],
 ]);
@@ -124,41 +124,68 @@ export async function update_map(
 					updateWhenIdle: true,
 				})
 				.addTo(MAP);
-            
-            map_bounds = writable(MAP.getBounds())
 
-            MAP.addEventListener('zoomstart', updateBounds)
-			MAP.addEventListener('zoomend', updateBounds)
+			map_bounds = writable(MAP.getBounds());
 
-			MAP.addEventListener('drag', updateBounds)
+			MAP.addEventListener('zoom', () => { 
+				updateBounds(); 
+				tracks.update((tracks) => {
+					for (const [, track] of tracks) {
+						track.following = false;
+					}
+					return tracks;
+				})
+			});
+			MAP.addEventListener('move', updateBounds);
+			MAP.addEventListener('zoomanim', updateBounds);
+			MAP.addEventListener('drag', updateBounds);
 		}
 	}
 }
 
 function updateBounds() {
-    if (MAP) {
-        map_bounds.set(MAP.getBounds());
-		update_state.update(() => {return false})
+	if (MAP) {
+		map_bounds.set(MAP.getBounds());
+		update_state.update(() => {
+			return false;
+		});
 		update_trigger.update((trigger) => trigger - 1);
-    }
+	}
 }
 
-export function projectCoords(coords: LatLngLiteral, width: number, height: number): {x: number, y: number} {
-	let point = { x: 0, y: 0 }
+
+export function panMap(center_coords: [number, number], inter_speed: number) {
 	if (MAP) {
-		const map_point = MAP.project([coords.lat, coords.lng])
+		MAP.panTo(center_coords, {animate: true, duration: inter_speed})
+	}
+}
+
+export function projectCoords(
+	coords: LatLngLiteral,
+	width: number,
+	height: number,
+): { x: number; y: number } {
+	let point = { x: 0, y: 0 };
+	if (MAP) {
+		const map_point = MAP.project([coords.lat, coords.lng]);
 		point.x = map_point.x;
 		point.y = map_point.y;
 
 		//console.log("Coords ", coords, " turned into ", map_point)
 	}
-	
-	const bounds = MAP?.getBounds()
+
+	const bounds = MAP?.getBounds();
 	if (bounds) {
-					//							  minLon				maxLon			    minLon
-		const x = ((coords.lng - bounds.getWest()) / (bounds.getEast() - bounds.getWest()) * width) 
-					//				maxLat							maxLat				  minLon
-		const y = ((bounds.getNorth() - coords.lat) / (bounds.getNorth() - bounds.getSouth()) * height)
+		//							  minLon				maxLon			    minLon
+		const x =
+			((coords.lng - bounds.getWest()) /
+				(bounds.getEast() - bounds.getWest())) *
+			width;
+		//				maxLat							maxLat				  minLon
+		const y =
+			((bounds.getNorth() - coords.lat) /
+				(bounds.getNorth() - bounds.getSouth())) *
+			height;
 		//console.log("Our point would have been x: " + x + " y: " + y)
 
 		point.x = x;
