@@ -3,7 +3,7 @@ import { InstantVector, PrometheusDriver, RangeVector } from "prometheus-query";
 import Plane, { translate_property } from "../../../../common/model/Plane.js";
 
 const prom = new PrometheusDriver({
-  endpoint: "http://localhost:9092",
+  endpoint: "http://localhost:19090",
   baseURL: "/api/v1", // default value
 });
 

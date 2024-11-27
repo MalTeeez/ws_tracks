@@ -1,4 +1,4 @@
-const API_BASE_URL : string = "http://sxmaa.net:9001/api/";
+const API_BASE_URL : string = "http://localhost:9001/api/";
 
 export async function postJSON(endpoint : string, json : JSON) {
   const req = new Request(API_BASE_URL + endpoint, {method: "POST", body: JSON.stringify(json)});

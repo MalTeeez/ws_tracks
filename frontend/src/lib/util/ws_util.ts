@@ -12,7 +12,7 @@ import UpdatePacket from '../../../../common/model/packet/UpdatePacket';
 import DeletePacket from '../../../../common/model/packet/DeletePacket';
 
 let ws: WebSocket;
-let base_url: string = 'sxmaa.net:9001/tracks';
+let base_url: string = 'localhost:9001/tracks';
 let curr_interval: number;
 
 export function closeWS() {

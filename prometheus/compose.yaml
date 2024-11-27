@@ -1,0 +1,19 @@
+services:
+# NOTE: Wont work because host.docker.internal needs root
+  prometheus-mtt:
+    image: prom/prometheus
+    container_name: prometheus-mtt
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "19092:9090"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    
+#  debug:
+#    image: nicolaka/netshoot
+#    command: ["tail", "-f", "/dev/null"]
+#    extra_hosts:
+#      - host.docker.internal:host-gateway
